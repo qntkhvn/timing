@@ -118,7 +118,7 @@ Spoiler alert: Patrick Mahomes is really good at football.
 ```{r}
 #| fig-height: 9
 #| fig-width: 6
-readr::read_rds("../figures/posteriors_slab.rds")
+readRDS("../figures/posteriors_slab.rds")
 ```
 
 
@@ -134,7 +134,7 @@ Thus, lower variability in motion-to-snap timing corresponds to higher rate of f
 ```{r}
 #| fig-height: 4.5
 #| fig-width: 10
-readr::read_rds("../figures/corr_havoc.rds")
+readRDS("../figures/corr_havoc.rds")
 ```
 
 

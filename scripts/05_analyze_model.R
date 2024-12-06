@@ -96,8 +96,8 @@ corr_havoc <- plays_havoc_rate_motion |>
   theme_light() +
   theme(panel.grid.minor = element_blank(),
         text = element_text(family = "Fira Sans"),
-        axis.title = element_text(face = "bold", size = rel(1)),
-        strip.text = element_text(face = "bold", size = rel(0.95), color = "black"),
+        axis.title = element_text(face = "bold", size = rel(1.2)),
+        strip.text = element_text(face = "bold", size = rel(1.1), color = "black"),
         strip.background = element_rect(fill = "gray90", color = NA),
         plot.title = element_text(hjust = 0.5))
 
