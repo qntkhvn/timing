@@ -1,0 +1,136 @@
+---
+output: html_document
+---
+
+# Introduction
+
+Example plays
+
+Story: 
+
+higher variability = good?, give defense different looks
+
+vs always the same time / low var -> figure out when snaps are gonna be -> not good? (more "predictable")
+
+don't want defense to know when you're snapping
+
+wanna be deceptive?
+
+varying the amount of time between motion and snap
+
+correlate
+
+low var -> higher sack/havoc rate -> more vulnerable
+
+low var: easier to predict when the snap will be
+
+
+# Defining motion-to-snap timing
+
+We define the motion-to-snap timing $\delta$ for a play as the number of frames elapsed between the start of motion $(t_{\text{motion}})$ and the ball snap $(t_{\text{snap}})$.
+That is, $$\delta = t_{\text{snap}} - t_{\text{motion}}\,.$$ 
+Note that in our analysis, we only consider plays with players in motion at snap and running a route.
+
+Here, it is straightforward to obtain $t_{\text{snap}}$ for each play using frame label in the tracking data.
+Conversely, identifying $t_{\text{motion}}$ requires more efforts, due to [inconsistency between player-level motion indicators and annotated tracking events](https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709).
+
+We use the following procedure to determine $t_{\text{motion}}$ for each play. 
+
+*   For plays where the players in motion at snap is also the only players in motion since line-set, we use the `man_in_motion` event tag in the tracking data as the moment where motion begins.
+
+*   For the remaining plays (specifically, plays where motion player at snap is not the sole player in motion since line-set, and plays with players charted as in motion at snap but without a `man_in_motion` tracking event):
+
+    *   We first observe the distribution for ratio between the speed at the `man_in_motion` event and the maximum speed between line-set and snap (only using plays with $t_{\text{motion}}$ identified earlier). 
+
+    *   We then choose the average ratio value of 0.45 as the threshold for determining the start of motion for the remaining plays. Accordingly, we assign $t_{\text{motion}}$ as the first frame between line-set and snap where the player reaches at least 45% of their top speed.
+
+
+# Model
+
+<!-- (based on EDA) -->
+
+The observed timing between motion and snap on a single play is surely attributable to numerous variables---from contextual and tracking features, to the players and team involved.
+To this end, we fit the following multilevel model:
+
+\begin{align}
+  \delta_i  &\sim \textsf{Gamma}(\mu_i, \phi_i) \\
+  \log \phi_i &=\alpha_{q[i]} \\
+  \log \mu_i &=\alpha_{q[i],m[i],d[i]} + \boldsymbol{\beta X_i} \\
+  \alpha_q  &\sim \textsf{Normal}(\mu_{\alpha_q}, \sigma^2_{\alpha_q}) && \textrm{ for quarterback } q = 1, \dots, Q \\
+  \alpha_m  &\sim \textsf{Normal}(\mu_{\alpha_m}, \sigma^2_{\alpha_m}) && \textrm{ for motion player } m = 1, \dots, M \\
+  \alpha_d  &\sim \textsf{Normal}(\mu_{\alpha_d}, \sigma^2_{\alpha_d}) && \textrm{ for defensive team } d = 1, \dots, D \\
+\end{align}
+
+In detail, we use a Gamma distribution to model the response $\delta_i$ (motion-to-snap timing for play $i$).
+The Gamma distribution is well-suited for modeling a positive, continuous variable like the motion-to-snap timing in our case.
+
+We model the $\phi$ parameter, which represents the shape/variance of the distribution, with QB random effects.
+This allows us to examine the variability in timing among QBs.
+[[TODO: why is this interesting. Connect with the intro/motivation.]]
+
+At the mean level, the model consists of random intercepts for two player groups---quarterback and motion player, and one team group---defense.
+We consider a normal distribution to obtain the random intercepts for each player toward their respective group means.
+We also account for features about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol \beta$ as fixed effects.
+Specifically, we control for contextual information such as the current down, number of timeouts remaining for the offense, and play clock at the start of motion, as these variables can impact the timing between motion and snap.
+We also account for the motion player's position (WR, TE, RB/FB) and the number of players in motion since line-set, as these personnel information can relate to low/high variability in timing.
+
+Another feature that should be crucially important for modeling timing is the type of motion; however this is not included in the original data.
+To address this, we use a Gaussian mixture model to cluster the motion type.
+Our clustering input consists of derived tracking data features related to the motion player's location at different events relative to the ball-snapper's location before the snap.
+In particular, we compute the absolute difference in both horizontal (endzone) and vertical (sideline) directions between the motion player at the moment of snap and the center.
+We also include the vertical displacement between the ball-snapper at line-set and the motion player at the start of motion and when they cross the line of scrimmage (LOS).
+If the motion player never crosses the LOS on a play, we instead use the location at the earlier point between the moment a QB event occurs (e.g., pass forward, qb sack, fumble) and 3 seconds after the snap.
+This threshold is chosen using the observed distribution for time elapsed from snap to moment of crossing the LOS for plays where player does cross the LOS, as it captures a sufficiently large fraction (95%) of the aforementioned time elapsed values.
+
+We perform clustering via the `mclust` `R` package, and obtain an optimal number of clusters of 7 motion types (chosen using BIC).
+
+
+<!-- 
+a finite mixture of 7 ellipsoidal multivariate Gaussian distributions with varying volume, shape, and orientation (VVV model)
+Once the clusters are identified, we can the label the motion types to add more context to our cluster assignments.
+-->
+
+[[Say something here about visual inspections and how the clusters make sense with an eye test?]]
+
+Our model is fitted in a Bayesian framework via the `brms` `R` package using 4 parallel chains, each having 10,000 iterations and 5,000 burn-in draws.
+We perform diagnostics by computing the $\widehat R$ and effective sample size statistics and find no issues regarding model convergence and efficiency, respectively.
+Ultimately, we obtain the posterior distributions for our model parameters, and we analyze them in the following section.
+
+# Analysis
+
+Of primary interest, we focus on the shape/variance parameter in our model.
+The following figure displays the posterior distributions for the QB random intercept (ordered by posterior means) for those with at least 50 pass attempts across the considered plays.
+
+Can we rename this? (like what ability is this?)
+
+Spoiler alert: Patrick Mahomes is really good at football.
+
+
+
+
+We further examine the relationship between the aforementioned QB posterior means and a measure of "havoc rate". 
+Here, a havoc event is defined as whether any of the following outcomes are generated on a play: pass breakup, forced fumble, tackle for loss, interception, sack, and pressure.
+Figure X is a scatterplot of the posterior mean and havoc rate for all passing plays in the considered nine-week data sample.
+We observe a moderately strong, negative correlation ($r=-0.52$) between the quantities.
+Thus, lower variability in motion-to-snap timing corresponds to higher rate of facing disruptive events created by the opposing defense.
+
+
+<!-- passDefensed -->
+<!-- forcedFumbleAsDefense -->
+<!-- tackleForALoss -->
+<!-- hadInterception -->
+<!-- sackYardsAsDefense -->
+<!-- causedPressure -->
+
+
+# Discussion
+
+Our approach is not without limitations, leaving potential avenues for future work.
+To identify the start of motion, we use a threshold-based criterion which relies only on a player's top speed prior to the snap.
+This is certainly a simple viewpoint, as one could come up with a more rigid definition by building a model to predict the starting motion frame.
+
+Also functional clustering
+
+# Appendix
+
+All code is available at https://github.com/qntkhvn/timing.
