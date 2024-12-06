@@ -2,6 +2,16 @@
 output: html_document
 ---
 
+```{r}
+#| include: false
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+```
+
 # Introduction
 
 Example plays
@@ -105,14 +115,28 @@ Can we rename this? (like what ability is this?)
 
 Spoiler alert: Patrick Mahomes is really good at football.
 
+```{r}
+#| fig-height: 9
+#| fig-width: 6
+readr::read_rds("../figures/posteriors_slab.rds")
+```
 
 
 
 We further examine the relationship between the aforementioned QB posterior means and a measure of "havoc rate". 
 Here, a havoc event is defined as whether any of the following outcomes are generated on a play: pass breakup, forced fumble, tackle for loss, interception, sack, and pressure.
-Figure X is a scatterplot of the posterior mean and havoc rate for all passing plays in the considered nine-week data sample.
-We observe a moderately strong, negative correlation ($r=-0.52$) between the quantities.
+The figure below is a scatterplot of the posterior mean and havoc rate for all passing plays (left) and only the considered motion plays (right) during the first nine weeks of the 2022 NFL regular season.
+
+We observe a moderately strong, negative correlation between the quantities.
 Thus, lower variability in motion-to-snap timing corresponds to higher rate of facing disruptive events created by the opposing defense.
+
+
+```{r}
+#| fig-height: 4.5
+#| fig-width: 10
+readr::read_rds("../figures/corr_havoc.rds")
+```
+
 
 
 <!-- passDefensed -->

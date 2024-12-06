@@ -20,7 +20,7 @@ qb_shape_posterior <- snap_timing_fit |>
   arrange(posterior_mean_shape)
 
 library(ggdist)
-snap_timing_fit |> 
+posteriors_slab <- snap_timing_fit |> 
   spread_draws(r_passer_player_id__shape[passer_player_id, term]) |>
   left_join(distinct(play_context, passer_player_name, passer_player_id)) |> 
   filter(passer_player_id %in% qb_filtered$passer_player_id) |> 
@@ -47,6 +47,8 @@ snap_timing_fit |>
         legend.position = "bottom",
         legend.margin = margin(t = -3))
 
+# write_rds(posteriors_slab, "figures/posteriors_slab.rds", compress = "gz")
+
 
 plays_havoc <- player_play |> 
   mutate(havoc = (passDefensed + forcedFumbleAsDefense + tackleForALoss + hadInterception +
@@ -68,7 +70,7 @@ plays_havoc_rate_overall <- play_context |>
   summarize(havoc_rate_overall = mean(havoc)) |> 
   ungroup()
   
-plays_havoc_rate_motion |> 
+corr_havoc <- plays_havoc_rate_motion |> 
   inner_join(qb_shape_posterior) |> 
   left_join(plays_havoc_rate_overall) |> 
   filter(passer_player_id %in% qb_filtered$passer_player_id) |> 
@@ -99,6 +101,7 @@ plays_havoc_rate_motion |>
         strip.background = element_rect(fill = "gray90", color = NA),
         plot.title = element_text(hjust = 0.5))
 
+# write_rds(corr_havoc, "figures/corr_havoc.rds", compress = "gz")
 
 # yards per attempt
 # success rate
