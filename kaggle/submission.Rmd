@@ -66,11 +66,11 @@ To this end, we fit the following multilevel model:
 
 \begin{align*}
   \delta_i  &\sim \textsf{Gamma}(\mu_i, \phi_i) \\
-  \log \phi_i &=\alpha_{q[i]} \\
   \log \mu_i &=\alpha_{q[i],m[i],d[i]} + \boldsymbol{\beta X_i} \\
-  \alpha_q  &\sim \textsf{Normal}(\mu_{\alpha_q}, \sigma^2_{\alpha_q}) && \textrm{ for quarterback } q = 1, \dots, Q \\
-  \alpha_m  &\sim \textsf{Normal}(\mu_{\alpha_m}, \sigma^2_{\alpha_m}) && \textrm{ for motion player } m = 1, \dots, M \\
-  \alpha_d  &\sim \textsf{Normal}(\mu_{\alpha_d}, \sigma^2_{\alpha_d}) && \textrm{ for defensive team } d = 1, \dots, D \\
+  \log \phi_i &=\alpha_{q[i]} \\
+  \alpha_q  &\sim \textsf{Normal}(\mu_{\alpha_q}, \sigma^2_{\alpha_q}) && \textrm{\small{\(\textrm{for quarterback}\)}} &q &= 1, \dots, Q \\
+  \alpha_m  &\sim \textsf{Normal}(\mu_{\alpha_m}, \sigma^2_{\alpha_m}) && \textrm{\small{\(\textrm{for motion player}\)}} &m &= 1, \dots, M \\
+  \alpha_d  &\sim \textsf{Normal}(\mu_{\alpha_d}, \sigma^2_{\alpha_d}) && \textrm{\small{\(\textrm{for defensive team}\)}} &d &= 1, \dots, D \\
 \end{align*}
 
 In detail, we use a Gamma distribution to model the response $\delta_i$ (motion-to-snap timing for play $i$).
