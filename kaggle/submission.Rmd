@@ -16,25 +16,37 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Example plays
+Consider the following two passing plays by Chiefs QB Patrick Mahomes in the 2022 NFL regular season.
+The first play was a short pass to M. Valdes-Scantling for a first down against the Colts in week 3.
+The second play was a TD pass to J.Smith-Schuster against the 49ers in week 7.
 
-Story: 
+[[TODO: add more about these plays]]
 
-higher variability = good?, give defense different looks
+In both of these plays, KC uses the same type of motion---glide, as the motion player (highlighted in gold) lines up in an outside wide alignment, and then starts motioning towards the inside, and the ball is snapped when the player is about halfway to the center.
 
-vs always the same time / low var -> figure out when snaps are gonna be -> not good? (more "predictable")
+But these two plays differ in the time between start of motion and ball snap.
+In the first play, the snap happens 3.6 seconds after the motion begins, whereas for the second, the snap occurs within a half second of the motion.
 
-don't want defense to know when you're snapping
+In this work, we focus on evaluating a passer's ability to react and adapt to different variability in timing.
 
-wanna be deceptive?
 
-varying the amount of time between motion and snap
+<!-- Story:  -->
 
-correlate
+<!-- higher variability = good?, give defense different looks -->
 
-low var -> higher sack/havoc rate -> more vulnerable
+<!-- vs always the same time / low var -> figure out when snaps are gonna be -> not good? (more "predictable") -->
 
-low var: easier to predict when the snap will be
+<!-- don't want defense to know when you're snapping -->
+
+<!-- wanna be deceptive? -->
+
+<!-- varying the amount of time between motion and snap -->
+
+<!-- correlate -->
+
+<!-- low var -> higher sack/havoc rate -> more vulnerable -->
+
+<!-- low var: easier to predict when the snap will be -->
 
 
 # Defining snap timing
@@ -166,3 +178,5 @@ There may also be room for improvement in clustering the motion types by having 
 # Appendix
 
 All code is available at https://github.com/qntkhvn/timing.
+
+<!-- STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>EACTION, <u>A</u>DAPTIVITY & <u>VA</u>RIABILITY -->
