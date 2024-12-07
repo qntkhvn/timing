@@ -68,41 +68,44 @@ To this end, we fit the following multilevel model:
   \delta_i  &\sim \textsf{Gamma}(\mu_i, \phi_i) \\
   \log \mu_i &=\alpha_{q[i],m[i],d[i]} + \boldsymbol{\beta X_i} \\
   \log \phi_i &=\alpha_{q[i]} \\
-  \alpha_q  &\sim \textsf{Normal}(\mu_{\alpha_q}, \sigma^2_{\alpha_q}) && \textrm{\small{\(\textrm{for quarterback}\)}} &q &= 1, \dots, Q \\
-  \alpha_m  &\sim \textsf{Normal}(\mu_{\alpha_m}, \sigma^2_{\alpha_m}) && \textrm{\small{\(\textrm{for motion player}\)}} &m &= 1, \dots, M \\
-  \alpha_d  &\sim \textsf{Normal}(\mu_{\alpha_d}, \sigma^2_{\alpha_d}) && \textrm{\small{\(\textrm{for defensive team}\)}} &d &= 1, \dots, D \\
+  \alpha_q  &\sim \textsf{Normal}(\mu_{\alpha_q}, \sigma^2_{\alpha_q}) && \small{\textrm{for quarterback}} &q &= 1, \dots, Q \\
+  \alpha_m  &\sim \textsf{Normal}(\mu_{\alpha_m}, \sigma^2_{\alpha_m}) && \small{\textrm{for motion player}} &m &= 1, \dots, M \\
+  \alpha_d  &\sim \textsf{Normal}(\mu_{\alpha_d}, \sigma^2_{\alpha_d}) && \small{\textrm{for defensive team}} &d &= 1, \dots, D \\
 \end{align*}
 
-In detail, we use a Gamma distribution to model the response $\delta_i$ (motion-to-snap timing for play $i$).
-The Gamma distribution is well-suited for modeling a positive, continuous variable like the motion-to-snap timing in our case.
+In detail, we model the response $\delta_i > 0$ (motion-to-snap timing for play $i$) with a Gamma distribution, which is well-suited for a positive, continuous  like our case.
 
 We model the $\phi$ parameter, which represents the shape/variance of the distribution, with QB random effects.
 This allows us to examine the variability in timing among QBs.
 [[TODO: why is this interesting. Connect with the intro/motivation.]]
 
-At the mean level, the model consists of random intercepts for two player groups---quarterback and motion player, and one team group---defense.
-We consider a normal distribution to obtain the random intercepts for each player toward their respective group means.
+For the mean parameter $\mu$, the model consists of random intercepts for the quarterback, motion player, and defensive team.
 We also account for features about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol \beta$ as fixed effects.
 Specifically, we control for contextual information such as the current down, number of timeouts remaining for the offense, and play clock at the start of motion, as these variables can impact the timing between motion and snap.
 We also account for the motion player's position (WR, TE, RB/FB) and the number of players in motion since line-set, as these personnel information can relate to low/high variability in timing.
 
-Another feature that should be crucially important for modeling timing is the type of motion; however this is not included in the original data.
-To address this, we use a Gaussian mixture model to cluster the motion type.
-Our clustering input consists of derived tracking data features related to the motion player's location at different events relative to the ball-snapper's location before the snap.
+Another feature that should be crucially important for modeling timing is the type of motion.
+This information, however, is not included in the original data, prompting us to consider a Gaussian mixture model to cluster the motion types.
+Our clustering input consists of tracking data features related to the motion player's location at different events relative to the ball-snapper's location before the snap.
 In particular, we compute the absolute difference in both horizontal (endzone) and vertical (sideline) directions between the motion player at the moment of snap and the center.
 We also include the vertical displacement between the ball-snapper at line-set and the motion player at the start of motion and when they cross the line of scrimmage (LOS).
-If the motion player never crosses the LOS on a play, we instead use the location at the earlier point between the moment a QB event occurs (e.g., pass forward, qb sack, fumble) and 3 seconds after the snap.
-This threshold is chosen using the observed distribution for time elapsed from snap to moment of crossing the LOS for plays where player does cross the LOS, as it captures a sufficiently large fraction (95%) of the aforementioned time elapsed values.
+If the motion player never crosses LOS on a play, we instead use the location at the earlier point between the moment a QB event occurs (e.g., pass forward, qb sack, fumble) and 3 seconds after the snap.
+This threshold is chosen using the observed distribution for time elapsed from snap to the moment of crossing LOS for plays where players do cross LOS, as it captures a sufficiently large fraction (~95%) of the values.
 
 We perform clustering via the `mclust` `R` package, and obtain an optimal number of clusters of 7 motion types (chosen using BIC).
 
+[[TODO: flesh this out]]
+
+This should provide a reasonable starting point for identifying the different types of motion.
+
+The focus of our approach is not in designing the best clustering algorithm; something reasonable should be enough. (verified with visual inspection...)
+
+[[TODO: mention limitations in discussion - DONE]]
 
 <!-- 
 a finite mixture of 7 ellipsoidal multivariate Gaussian distributions with varying volume, shape, and orientation (VVV model)
 Once the clusters are identified, we can the label the motion types to add more context to our cluster assignments.
 -->
-
-[[Say something here about visual inspections and how the clusters make sense with an eye test?]]
 
 Our model is fitted in a Bayesian framework via the `brms` `R` package using 4 parallel chains, each having 10,000 iterations and 5,000 burn-in draws.
 We perform diagnostics by computing the $\widehat R$ and effective sample size statistics and find no issues regarding model convergence and efficiency, respectively.
@@ -118,7 +121,7 @@ Can we rename this? (like what ability is this?)
 Spoiler alert: Patrick Mahomes is really good at football.
 
 ```{r}
-#| fig-height: 9
+#| fig-height: 8
 #| fig-width: 6
 readRDS("../figures/posteriors_slab.rds")
 ```
@@ -151,11 +154,14 @@ readRDS("../figures/corr_havoc.rds")
 
 # Discussion
 
-Our approach is not without limitations, leaving potential avenues for future work.
-To identify the start of motion, we use a threshold-based criterion which relies only on a player's top speed prior to the snap.
-This is certainly a simple viewpoint, as one could come up with a more rigid definition by building a model to predict the starting motion frame.
+We have introduced...
 
-Also functional clustering
+
+
+Our approach is not without limitations, leaving potential avenues for future work.
+To identify the start of motion, we use a threshold-based criterion which relies only a fraction of a player's top speed prior to the snap.
+This is certainly a simple viewpoint, as one could come up with a more rigid definition by building a model to predict the starting motion frame.
+There may also be room for improvement in clustering the motion types by having more refined features (e.g., [[TODO: what are these? (Ron, what were the things we talked about)]]), or alternatively using a functional clustering approach.
 
 # Appendix
 

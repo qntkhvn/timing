@@ -39,11 +39,11 @@ posteriors_slab <- snap_timing_fit |>
        color = "Credible Interval",
        title = "Posterior distributions of QB shape random effect",
        subtitle = "For plays with players in motion at snap & running a route\nand QBs with at least 50 snaps played") +
-  theme_minimal() +
+  theme_minimal(base_family = "Fira Sans") +
   theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_line(color = "gray96"),
-        text = element_text(family = "Fira Sans"),
-        axis.text.y = element_text(family = "Fira Sans", face = "bold", size = 10),
+        panel.grid.major = element_line(color = "gray95"),
+        text = element_text(color = "black"),
+        axis.text.y = element_text(face = "bold", size = rel(1.15), color = "black"),
         legend.position = "bottom",
         legend.margin = margin(t = -3))
 
@@ -87,9 +87,9 @@ corr_havoc <- plays_havoc_rate_motion |>
               color = "gray",
               xseq = c(-0.45, 0.38),
               linetype = "dashed") +
-  geom_point(alpha = 0.6, size = 4, aes(color = I(team_color))) +
+  geom_point(alpha = 0.6, size = 3.5, aes(color = I(team_color))) +
   ggrepel::geom_text_repel(aes(label = passer_player_name), 
-                           family = "Fira Sans", size = rel(3.2)) +
+                           family = "Fira Sans", size = rel(3.2), seed = 2) +
   facet_wrap(~ play_subset) +
   labs(x = "Posterior mean for QB shape random effect",
        y = "Havoc rate") +
