@@ -4,7 +4,7 @@ source("scripts/04_fit_model.R")
 
 qb_filtered <- plays_snap_timing |> 
   distinct(gameId, playId, passer_player_id, passer_player_name) |> 
-  count(passer_player_id, passer_player_name) |> 
+  count(passer_player_id, passer_player_name) |>
   filter(n >= 50)
 
 library(tidybayes)
@@ -79,8 +79,11 @@ corr_havoc <- plays_havoc_rate_motion |>
                names_to = "play_subset",
                names_prefix = "havoc_rate_",
                values_to = "havoc_rate") |> 
-  mutate(play_subset = ifelse(play_subset == "motion", 
-                              "Considered motion plays (r = –0.40)", "All pass plays (r = –0.52)")) |> 
+  mutate(
+    passer_player_name = str_replace(passer_player_name, "\\.", "\\. "),
+    play_subset = ifelse(play_subset == "motion", 
+                         "Considered motion plays (r = –0.40)", "All pass plays (r = –0.52)")
+  ) |> 
   # group_by(play_subset) |> summarize(cor(posterior_mean_shape, havoc_rate))
   ggplot(aes(posterior_mean_shape, havoc_rate)) +
   geom_smooth(method = lm, se = FALSE,
@@ -89,7 +92,7 @@ corr_havoc <- plays_havoc_rate_motion |>
               linetype = "dashed") +
   geom_point(alpha = 0.6, size = 3.5, aes(color = I(team_color))) +
   ggrepel::geom_text_repel(aes(label = passer_player_name), 
-                           family = "Fira Sans", size = rel(3.2), seed = 2) +
+                           family = "Fira Sans", size = rel(3.2), seed = 6) +
   facet_wrap(~ play_subset) +
   labs(x = "Posterior mean for QB shape random effect",
        y = "Havoc rate") +
@@ -133,7 +136,7 @@ qb_mean_posterior |>
 receiver_filtered <- plays_snap_timing |> 
   distinct(gameId, playId, nflId) |> 
   count(nflId) |> 
-  filter(n >= 20)
+  filter(n > 15)
 
 receiver_posterior <- snap_timing_fit |> 
   spread_draws(r_nflId[nflId, term]) |> 
@@ -153,12 +156,13 @@ snap_timing_fit |>
   ggplot(aes(x = r_nflId, y = displayName, fill = position)) +
   ggridges::geom_density_ridges(rel_min_height = 0.05, alpha = 0.5) +
   # scale_fill_manual(values = c("gray", "darkblue", "darkred", "darkorange")) +
-  scale_fill_manual(values = c("orange", "midnightblue", "gray")) +
+  scale_fill_manual(values = c("gold", "red", "purple", "gray")) +
   # stat_interval(alpha = 0.8) +
   # stat_summary(geom = "point", fun = mean, size = 0.8) +
   # scale_color_manual(values = MetBrewer::met.brewer("VanGogh3"),
   #                    labels = c("95%", "80%", "50%")) +
   labs(x = "player random effect",
        y = NULL,
-       subtitle = "Players with min. 20 motions") +
+       subtitle = "Players with more than 15 motions") +
   theme_minimal()
+
