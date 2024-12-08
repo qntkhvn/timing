@@ -1,4 +1,6 @@
 ---
+title: |
+  | STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>HYTHM, <u>A</u>DAPTIVITY & <u>VA</u>RIABILITY
 output: 
   html_document: 
     math_method: katex
@@ -21,24 +23,23 @@ Consider the following two pass plays by Kansas City Chiefs QB Patrick Mahomes i
 The first play (left) is a 9-yard pass to WR Marquez Valdes-Scantling for a first down in the second quarter of Colts vs Chiefs in week 3.
 The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster in the fourth quarter against the 49ers in week 7.
 
-[[TODO: insert animations]]
-
 :::: {style="display: flex;"}
 
 ::: {}
-First column
 
-```{r}
-plot(1)
-```
+<center>
+<img src="../figures/ex1.gif">
+</center>
+
 :::
 
 ::: {}
-Second column
 
-```{r}
-plot(1)
-```
+<center>
+<img src="../figures/ex2.gif">
+</center>
+
+
 :::
 
 ::::
@@ -49,11 +50,11 @@ In the first play, the snap happens 3.6 seconds after Travis Kelce begins motion
 As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to anticipate, react, and time the ball snaps in a variety of situations, elevating the effectiveness of his teammates.
 
 In this work, we focus on evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion.
-It is crucial for the QB to synchronize the snap with precise offensive execution, keeping the defense off balance and offense in control.
+It is important for the QB to synchronize the snap with the team's offensive execution, keeping the defense off balance and offense in control.
 
 [[I feel like we should emphasize the timing variability even more here]]
 
-<!-- which can help the offense dictate the tempo of a play and exploit defensive vulnerabilities. -->
+<!-- dictate the tempo of a play and exploit defensive vulnerabilities. -->
 
 <!-- Story:  -->
 
@@ -78,20 +79,20 @@ It is crucial for the QB to synchronize the snap with precise offensive executio
 
 We define the snap timing $\delta$ for a play as the number of frames elapsed between the start of motion $(t_{\text{motion}})$ and the ball snap $(t_{\text{snap}})$.
 That is,$$\delta = t_{\text{snap}} - t_{\text{motion}}\,.$$ 
-Note that in our analysis, we only consider plays with players in motion at snap and running a route.
+Note that in our analysis, we only consider **plays with players in motion at snap and running a route**.
 
 Here, it is straightforward to obtain $t_{\text{snap}}$ for each play using frame label in the tracking data.
 Conversely, identifying $t_{\text{motion}}$ requires more efforts, due to [inconsistency between player-level motion indicators and annotated tracking events](https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709).
 
 We use the following procedure to determine $t_{\text{motion}}$ for each play. 
 
-*   For plays where the players in motion at snap is also the only players in motion since line-set, we use the `man_in_motion` event tag in the tracking data as the moment where motion begins.
+*   For plays where the player in motion at snap is also the only player in motion since line-set, we use the `man_in_motion` event frame in the tracking data as the start of motion.
 
 *   For the remaining plays (specifically, plays where motion player at snap is not the sole player in motion since line-set, and plays with players charted as in motion at snap but without a `man_in_motion` tracking event):
 
     *   We first observe the distribution for ratio between the speed at the `man_in_motion` event and the maximum speed between line-set and snap (only using plays with $t_{\text{motion}}$ identified earlier). 
 
-    *   We then choose the average ratio value of 0.45 as the threshold for determining the start of motion for the remaining plays. Accordingly, we assign $t_{\text{motion}}$ as the first frame between line-set and snap where the player reaches at least 45% of their top speed.
+    *   We then choose the average ratio value of 0.45 as the threshold for determining the start of motion for the remaining plays. Specifically, we assign $t_{\text{motion}}$ as the first frame between line-set and snap where the player reaches at least 45% of their top speed.
 
 
 # Multilevel model for snap timing
@@ -115,25 +116,32 @@ To this end, we fit the following multilevel model:
 In detail, we model the response $\delta_i > 0$ (snap timing for play $i$) with a Gamma distribution, which is well-suited for a positive, continuous variable like our case.
 
 We model the $\phi$ parameter, which represents the shape/variance of the distribution, with QB random effects.
-This allows us to examine the variability in timing among QBs.
+This allows us to examine the variability in timing among the quarterbacks.
+We hypothesize that a higher variability in timing is beneficial because it prevents defenses from predicting when the ball will be snapped.
+This can potentially help the offense control the game flow and exploit defensive vulnerabilities.
+
 [[TODO: why is this interesting. Connect with the intro/motivation.]]
 
 For the mean parameter $\mu$, the model consists of random intercepts for the quarterback, motion player, and defensive team.
 We also account for features about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol \beta$ as fixed effects.
-Specifically, we control for contextual information such as the current down, number of timeouts remaining for the offense, and play clock at the start of motion, as these variables can impact the timing between motion and snap.
-We also account for the motion player's position (WR, TE, RB/FB) and the number of players in motion since line-set, as these personnel information can relate to low/high variability in timing.
+Specifically, we control for contextual information such as the current down, number of timeouts remaining for the offense, and play clock at the start of motion, since they can impact the timing between motion and snap.
+We also account for the motion player's position (WR, TE, RB/FB) and the number of players in motion since line-set, as these personnel information can relate to timing.
 Another feature that should be crucially important for modeling timing is the type of motion.
 [[TODO: why do we need motion type]]
 This information, however, is not included in the original data, prompting us to consider a clustering algorithm to identify the motion types.
 
 ## Model-based clustering of motion types
 
-We use a Gaussian mixture model to obtain unsupervised labels for the types of motion.
-Our clustering input consists of tracking data features related to the motion player's location at different events relative to the ball-snapper's location before the snap.
-In particular, we compute the absolute difference in both horizontal (endzone) and vertical (sideline) directions between the motion player at the moment of snap and the center.
-We also include the vertical displacement between the ball-snapper at line-set and the motion player at the start of motion and when they cross the line of scrimmage (LOS).
-If the motion player never crosses LOS on a play, we instead use the location at the earlier point between the moment a QB event occurs (e.g., pass forward, qb sack, fumble) and 3 seconds after the snap.
-This threshold is chosen using the observed distribution for time elapsed from snap to the moment of crossing LOS for plays where players do cross LOS, as it captures a sufficiently large fraction (~95%) of the values.
+We use a Gaussian mixture model to obtain unsupervised labels for the motion types.
+Our clustering input contains tracking data features describing the motion player's location at different events relative to the ball-snapper's location before the snap.
+In particular, we compute the absolute difference in both horizontal (endzone) and vertical (sideline) directions between the motion player at the moment of snap and the snapper.
+We also include the vertical displacement between the snapper and the motion player at both the start of motion and when they cross the line of scrimmage (LOS).
+If the motion player never crosses LOS on a play, we instead use the location at either the QB event (e.g., forward pass, sack, fumble) or 3 seconds after the snap, whichever occurs first.
+This threshold is chosen using the observed distribution for time elapsed from snap to crossing LOS for plays where motion players do cross LOS, as it captures a sufficiently large fraction (~95%) of the values.
+
+<!-- 
+I prefer "snapper" to "center" here 
+-->
 
 We perform clustering via the `mclust` `R` package, and obtain an optimal number of clusters of 7 motion types (chosen using BIC).
 
@@ -210,4 +218,4 @@ There may also be room for improvement in clustering the motion types by having 
 
 All code is available at https://github.com/qntkhvn/timing.
 
-<!-- STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>EACTION, <u>A</u>DAPTIVITY & <u>VA</u>RIABILITY -->
+<!-- STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>HYTHM, <u>A</u>DAPTIVITY & <u>VA</u>RIABILITY -->

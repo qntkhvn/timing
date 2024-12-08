@@ -1,0 +1,240 @@
+---
+title: a
+output:
+  xaringan::moon_reader:
+    self_contained: true
+    nature:
+      ratio: '16:9'
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      slideNumberFormat: "%current%"
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  # fig.width = 9,
+  # fig.height = 3.5,
+  fig.retina = 3, 
+  out.width = "100%",
+  # cache = TRUE,
+  echo = FALSE,
+  message = FALSE, 
+  warning = FALSE,
+  comment = "",
+  hiline = TRUE,
+  fig.align = "center"
+)
+library(tidyverse)
+library(gganimate)
+
+tracking <- arrow::read_parquet("../data/tracking.parquet")
+ex1 <- tracking |> 
+  filter(gameId == 2022092502, playId == 1180) |> 
+  mutate(first_frame = frameId[which(event == "line_set")][1],
+         last_frame = frameId[which(event == "tackle")][1]) |> 
+  filter(frameId >= first_frame & frameId <= last_frame)
+
+ex2 <- tracking |> 
+  filter(gameId == 2022102310, playId == 3897) |> 
+  mutate(first_frame = frameId[which(event == "line_set")][1],
+         last_frame = frameId[which(event == "touchdown")][1]) |> 
+  filter(frameId >= first_frame & frameId <= last_frame)
+```
+
+---
+
+.pull-left[
+
+```{r}
+ex1 |> 
+  mutate(
+    pt_size = ifelse(club == "football", 3, 6),
+    pt_fill = case_when(
+      club == "IND" ~ "#002C5F",
+      club == "KC" & nflId == "40011" ~ "gold",
+      club == "KC" & nflId != "47839" ~ "white",
+      club == "football" ~ "#825736"
+    )
+  ) |> 
+  ggplot() +
+  annotate("rect",
+           xmin = 160/3,
+           xmax = 0,
+           ymin = 15,
+           ymax = 65,
+           fill = scales::alpha("#21ae5f", 0.9)) +
+  annotate("text", 
+           y = seq(20, 60, 10),
+           x = 10,
+           color = "white",
+           family = "Chivo",
+           label = seq(10, 50, 10),
+           size = 6,
+           angle = 90) +
+  annotate("text", 
+           y = seq(20, 60, 10),
+           x = 40,
+           color = "white",
+           family = "Chivo",
+           label = seq(10, 50, 10),
+           size = 6,
+           angle = 270) +
+  annotate("text", 
+           y = setdiff(seq(15, 65, 1), seq(15, 65, 5)),
+           x = 160/3,
+           color = "white",
+           label = "—") +
+  annotate("text", 
+           y = setdiff(seq(15, 65, 1), seq(15, 65, 5)),
+           x = 0,
+           color = "white",
+           label = "—") +
+  annotate("text", 
+           y = setdiff(seq(15, 65, 1), seq(15, 65, 5)),
+           x = 23.36667,
+           color = "white",
+           size = 3,
+           label = "—") +
+  annotate("text", 
+           y = setdiff(seq(15, 65, 1), seq(15, 65, 5)),
+           x = 29.96667,
+           color = "white",
+           size = 3,
+           label = "—") +
+  annotate("segment", 
+           y = 15,
+           yend = 65,
+           x = c(160/3, 0),
+           xend = c(160/3, 0),
+           color = "white") +
+  geom_hline(yintercept = seq(15, 65, 5), color = "white") +
+  annotate("segment", 
+           y = 35,
+           yend = 35,
+           x = 0,
+           xend = 160/3,
+           size = 1.5,
+           color = "#FDE725") +
+  annotate("segment", 
+           y = 27,
+           yend = 27,
+           x = 0,
+           xend = 160/3,
+           size = 1.5,
+           color = "#000aa0") +
+  geom_point(aes(y, x, fill = pt_fill, size = pt_size), shape = 21) +
+  scale_fill_identity() +
+  scale_size_identity() +
+  scale_x_reverse() +
+  transition_time(frameId) +
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+```
+
+]
+
+.pull-right[
+
+```{r}
+ex2 |> 
+  mutate(
+    pt_size = ifelse(club == "football", 3, 6),
+    pt_fill = case_when(
+      club == "SF" ~ "#AA0000",
+      club == "KC" & nflId == "47839" ~ "gold",
+      club == "KC" & nflId != "47839" ~ "white",
+      club == "football" ~ "#663831"
+    )
+  ) |> 
+  ggplot() +
+  annotate("rect",
+           xmin = 160/3,
+           xmax = 0,
+           ymin = 53,
+           ymax = 110,
+           fill = scales::alpha("#21ae5f", 0.9)) +
+  annotate("text", 
+           y = seq(60, 100, 10),
+           x = 10,
+           color = "white",
+           family = "Chivo",
+           label = seq(50, 10, -10),
+           size = 6,
+           angle = 90) +
+  annotate("text", 
+           y = seq(60, 100, 10),
+           x = 40,
+           color = "white",
+           family = "Chivo",
+           label = seq(50, 10, -10),
+           size = 6,
+           angle = 270) +
+  annotate("text", 
+           y = c(53:54, setdiff(seq(55, 110, 1), seq(55, 110, 5))),
+           x = 160/3,
+           color = "white",
+           label = "—") +
+  annotate("text", 
+           y = c(53:54, setdiff(seq(55, 110, 1), seq(55, 110, 5))),
+           x = 0,
+           color = "white",
+           label = "—") +
+  annotate("text", 
+           y = c(53:54, setdiff(seq(55, 110, 1), seq(55, 110, 5))),
+           x = 23.36667,
+           color = "white",
+           size = 3,
+           label = "—") +
+  annotate("text", 
+           y = c(53:54, setdiff(seq(55, 110, 1), seq(55, 110, 5))),
+           x = 29.96667,
+           color = "white",
+           size = 3,
+           label = "—") +
+  annotate("segment",
+           y = 55,
+           yend = 110,
+           x = c(160/3, 0),
+           xend = c(160/3, 0),
+           color = "white") +
+  geom_hline(yintercept = seq(55, 110, 5), color = "white") +
+  annotate("segment",
+           y = 70.5,
+           yend = 70.5,
+           x = 0,
+           xend = 160/3,
+           size = 1.5,
+           color = "#FDE725") +
+  annotate("segment",
+           y = 64.8,
+           yend = 64.8,
+           x = 0,
+           xend = 160/3,
+           size = 1.5,
+           color = "#000aa0") +
+  geom_point(aes(y, x, fill = pt_fill, size = pt_size), shape = 21) +
+  scale_fill_identity() +
+  scale_size_identity() +
+  scale_x_reverse() +
+  transition_time(frameId) +
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+```
+
+
+]
+
+
+
+
+
+
+

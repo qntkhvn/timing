@@ -16,7 +16,7 @@ ex1 <- tracking |>
   filter(gameId == 2022092502, playId == 1180) |> 
   mutate(first_frame = frameId[which(event == "line_set")][1],
          last_frame = frameId[which(event == "tackle")][1]) |> 
-  filter(frameId >= first_frame & frameId <= last_frame)
+  filter(frameId >= first_frame & frameId <= last_frame + 2)
 
 desc1 <- plays |> 
   filter(gameId == 2022092502, playId == 1180) |> 
@@ -51,6 +51,12 @@ ex1 |>
 
 
 
+
+
+
+# play 2 ------------------------------------------------------------------
+
+
 ex2 <- tracking |> 
   filter(gameId == 2022102310, playId == 3897) |> 
   mutate(first_frame = frameId[which(event == "line_set")][1],
@@ -77,7 +83,7 @@ ex2 |>
   scale_size_identity() +
   coord_flip() +
   scale_y_reverse() +
-  scale_x_continuous(breaks = seq(60, 100, 10), labels = c(seq(40, 10, -10), "G")) +
+  # scale_x_continuous(breaks = seq(60, 100, 10), labels = c(seq(40, 10, -10), "G")) +
   transition_time(frameId) +
   theme(panel.background = element_rect(fill = "springgreen3"),
         axis.text.x = element_blank(),
@@ -85,3 +91,13 @@ ex2 |>
   labs(title = "KC vs SF Week 7",
        subtitle = "0.5s between motion & snap. In motion: Mecole Hardman. Motion type: Glide",
        caption = desc2)
+
+
+
+
+
+
+
+
+
+
