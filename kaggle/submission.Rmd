@@ -18,8 +18,8 @@ knitr::opts_chunk$set(
 # Introduction
 
 Consider the following two pass plays by Kansas City Chiefs QB Patrick Mahomes in the 2022 NFL regular season.
-The first play is a 9-yard pass to WR Marquez Valdes-Scantling for a first down in the second quarter of Colts vs Chiefs in week 3.
-The second play is a 45-yard TD pass to WR JuJu Smith-Schuster in the fourth quarter against the 49ers in week 7.
+The first play (left) is a 9-yard pass to WR Marquez Valdes-Scantling for a first down in the second quarter of Colts vs Chiefs in week 3.
+The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster in the fourth quarter against the 49ers in week 7.
 
 [[TODO: insert animations]]
 
@@ -45,7 +45,7 @@ plot(1)
 
 In both plays, KC (in white) uses the same type of motion---glide, as the motion player (in gold) lines up in an outside wide alignment, then motions toward the inside, and the football is snapped when the player is about halfway to the center.
 Yet, the plays apparently differ in the time between start of motion and ball snap.
-In the first play, the snap happens 3.6 seconds after Travis Kelce begins motioning, whereas in the second, only a within a half-second after Mecole Hardman starts his motion.
+In the first play, the snap happens 3.6 seconds after Travis Kelce begins motioning, whereas in the second, only a half-second elapses since Mecole Hardman starts motioning.
 As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to anticipate, react, and time the ball snaps in a variety of situations, elevating the effectiveness of his teammates.
 
 In this work, we focus on evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion.
@@ -112,7 +112,7 @@ To this end, we fit the following multilevel model:
   \alpha_d  &\sim \textsf{Normal}(\mu_{\alpha_d}, \sigma^2_{\alpha_d}) && \small{\textrm{for defensive team}} &d &= 1, \dots, D \\
 \end{align*}
 
-In detail, we model the response $\delta_i > 0$ (snap timing for play $i$) with a Gamma distribution, which is well-suited for a positive, continuous  like our case.
+In detail, we model the response $\delta_i > 0$ (snap timing for play $i$) with a Gamma distribution, which is well-suited for a positive, continuous variable like our case.
 
 We model the $\phi$ parameter, which represents the shape/variance of the distribution, with QB random effects.
 This allows us to examine the variability in timing among QBs.
@@ -123,11 +123,12 @@ We also account for features about play $i$ through $\boldsymbol{X_i}$, and esti
 Specifically, we control for contextual information such as the current down, number of timeouts remaining for the offense, and play clock at the start of motion, as these variables can impact the timing between motion and snap.
 We also account for the motion player's position (WR, TE, RB/FB) and the number of players in motion since line-set, as these personnel information can relate to low/high variability in timing.
 Another feature that should be crucially important for modeling timing is the type of motion.
-This information, however, is not included in the original data, prompting us to perform a cluster analysis of the motion.
+[[TODO: why do we need motion type]]
+This information, however, is not included in the original data, prompting us to consider a clustering algorithm to identify the motion types.
 
 ## Model-based clustering of motion types
 
-We use a Gaussian mixture model to identify the motion types.
+We use a Gaussian mixture model to obtain unsupervised labels for the types of motion.
 Our clustering input consists of tracking data features related to the motion player's location at different events relative to the ball-snapper's location before the snap.
 In particular, we compute the absolute difference in both horizontal (endzone) and vertical (sideline) directions between the motion player at the moment of snap and the center.
 We also include the vertical displacement between the ball-snapper at line-set and the motion player at the start of motion and when they cross the line of scrimmage (LOS).
