@@ -2,6 +2,7 @@
 output: 
   html_document: 
     math_method: katex
+    number_sections: true
 ---
 
 ```{r}
@@ -17,17 +18,42 @@ knitr::opts_chunk$set(
 # Introduction
 
 Consider the following two pass plays by Kansas City Chiefs QB Patrick Mahomes in the 2022 NFL regular season.
-The first is a 9-yard pass to WR Marquez Valdes-Scantling for a first down in the second quarter of Colts vs Chiefs in week 3.
-The second is a 45-yard TD pass to WR JuJu Smith-Schuster in the fourth quarter against the 49ers in week 7.
-In both plays, KC uses the same type of motion---glide, as the motion player (highlighted in gold) lines up in an outside wide alignment, then motions toward the inside, and the football is snapped when the player is about halfway to the center.
-
-But these two plays differ in the time between start of motion and ball snap.
-In the first play, the snap happens ~4 seconds after the motion from Travis Kelce begins, whereas in the second, the snap occurs within a half second of the motion from Mecole Hardman.
+The first play is a 9-yard pass to WR Marquez Valdes-Scantling for a first down in the second quarter of Colts vs Chiefs in week 3.
+The second play is a 45-yard TD pass to WR JuJu Smith-Schuster in the fourth quarter against the 49ers in week 7.
 
 [[TODO: insert animations]]
 
-In this work, we focus on evaluating a passer's ability to react and adapt to different variability in timing.
+:::: {style="display: flex;"}
 
+::: {}
+First column
+
+```{r}
+plot(1)
+```
+:::
+
+::: {}
+Second column
+
+```{r}
+plot(1)
+```
+:::
+
+::::
+
+In both plays, KC (in white) uses the same type of motion---glide, as the motion player (in gold) lines up in an outside wide alignment, then motions toward the inside, and the football is snapped when the player is about halfway to the center.
+Yet, the plays apparently differ in the time between start of motion and ball snap.
+In the first play, the snap happens 3.6 seconds after Travis Kelce begins motioning, whereas in the second, only a within a half-second after Mecole Hardman starts his motion.
+As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to anticipate, react, and time the ball snaps in a variety of situations, elevating the effectiveness of his teammates.
+
+In this work, we focus on evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion.
+It is crucial for the QB to synchronize the snap with precise offensive execution, keeping the defense off balance and offense in control.
+
+[[I feel like we should emphasize the timing variability even more here]]
+
+<!-- which can help the offense dictate the tempo of a play and exploit defensive vulnerabilities. -->
 
 <!-- Story:  -->
 
