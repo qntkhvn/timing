@@ -1,0 +1,338 @@
+---
+output:
+  xaringan::moon_reader:
+    self_contained: true
+    nature:
+      ratio: '16:9'
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      slideNumberFormat: "%current%"
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  # fig.width = 9,
+  # fig.height = 3.5,
+  fig.retina = 3, 
+  out.width = "100%",
+  # cache = TRUE,
+  echo = FALSE,
+  message = FALSE, 
+  warning = FALSE,
+  comment = "",
+  hiline = TRUE,
+  fig.align = "center"
+)
+library(tidyverse)
+library(gganimate)
+
+tracking <- arrow::read_parquet("../data/tracking.parquet")
+plays <- read_csv("../data/plays.csv")
+
+# source("scripts/04_fit_model.R")
+# plays_snap_timing |> 
+#   filter(passer_player_name == "P.Mahomes") |> 
+#   left_join(select(players, nflId, displayName)) |> 
+#   select(gameId, playId, cluster, 
+#          motion_player = displayName, receiver_player_name, frame_between) |> 
+#   inner_join(select(plays_use_motion_tag, gameId, playId))
+```
+
+---
+
+.pull-left[
+
+```{r}
+ex1 <- tracking |> 
+  filter(gameId == 2022092502, playId == 1180) |> 
+  mutate(first_frame = frameId[which(event == "line_set")][1],
+         last_frame = frameId[which(event == "tackle")][1]) |> 
+  filter(frameId >= first_frame & frameId <= last_frame) |> 
+  mutate(
+    pt_size = ifelse(club == "football", 2.7, 5.4),
+    pt_fill_order = case_when(
+      club == "IND" ~ "2",
+      club == "KC" & nflId == "40011" ~ "3",
+      club == "KC" & nflId != "40011" ~ "1",
+      club == "football" ~ "4"
+    )
+  )
+club1 <- ex1 |> 
+  filter(club != "football")
+football1 <- ex1 |>
+  filter(club == "football")
+path1 <- ex1 |>
+  filter(nflId == 40011) |>
+  mutate(motion_frame = frameId[which(event == "man_in_motion")][1],
+         snap_frame = frameId[which(event == "ball_snap")][1]) |> 
+  mutate(motion_color = "lightgray",
+         motion_linetype = "dashed",
+         motion_linewidth = 0.4)
+motion1 <- path1 |>
+  filter(frameId >= motion_frame & frameId <= snap_frame) |> 
+  mutate(motion_color = "gold",
+         motion_linetype = "solid",
+         motion_linewidth = 1.2)
+desc1 <- ex1 |> 
+  distinct(gameId, playId) |> 
+  left_join(plays) |> 
+  mutate(playDescription = str_c("Q", quarter, ": ", playDescription),
+         playDescription = str_remove_all(playDescription, "\\s\\([A-z]\\..*"),
+         playDescription = str_replace_all(playDescription, "\\.", "\\. ")) |> 
+  pull(playDescription)
+```
+
+
+```{r}
+ggplot() +
+  annotate("rect",
+           xmin = 160/3,
+           xmax = 0,
+           ymin = 15,
+           ymax = 65,
+           fill = scales::alpha("#21ae5f", 0.9)) +
+  annotate("text", 
+           y = seq(20, 60, 10),
+           x = 10,
+           color = "white",
+           family = "Chivo",
+           label = seq(10, 50, 10),
+           size = 6,
+           angle = 90) +
+  annotate("text", 
+           y = seq(20, 60, 10),
+           x = 40,
+           color = "white",
+           family = "Chivo",
+           label = seq(10, 50, 10),
+           size = 6,
+           angle = 270) +
+  annotate("text", 
+           y = setdiff(seq(15, 65, 1), seq(15, 65, 5)),
+           x = 160/3,
+           color = "white",
+           label = "—") +
+  annotate("text", 
+           y = setdiff(seq(15, 65, 1), seq(15, 65, 5)),
+           x = 0,
+           color = "white",
+           label = "—") +
+  annotate("text", 
+           y = setdiff(seq(15, 65, 1), seq(15, 65, 5)),
+           x = 23.36667,
+           color = "white",
+           size = 3,
+           label = "—") +
+  annotate("text", 
+           y = setdiff(seq(15, 65, 1), seq(15, 65, 5)),
+           x = 29.96667,
+           color = "white",
+           size = 3,
+           label = "—") +
+  annotate("segment", 
+           y = 15,
+           yend = 65,
+           x = c(160/3, 0),
+           xend = c(160/3, 0),
+           color = "white") +
+  geom_hline(yintercept = seq(15, 65, 5), color = "white") +
+  annotate("segment", 
+           y = 35,
+           yend = 35,
+           x = 0,
+           xend = 160/3,
+           size = 1.5,
+           color = "#FDE725") +
+  annotate("segment", 
+           y = 27,
+           yend = 27,
+           x = 0,
+           xend = 160/3,
+           size = 1.5,
+           #000aa0
+           color = "midnightblue") +
+  geom_point(data = club1, 
+             aes(y, x, fill = pt_fill_order, size = pt_size, group = nflId), shape = 21) +
+  geom_point(data = football1, 
+             aes(y, x, size = pt_size, group = nflId), fill = "#654321", shape = 21) +
+  geom_line(data = motion1,
+            aes(y, x, color = motion_color, linetype = motion_linetype, linewidth = motion_linewidth)) +
+  geom_line(data = path1, 
+            aes(y, x, color = motion_color, linetype = motion_linetype, linewidth = motion_linewidth)) +
+  scale_fill_manual(values = c("white", "#002C5F", "gold"),
+                    labels = c("KC", "IND", "Motion (T. Kelce)")) +
+  scale_size_identity() +
+  scale_color_identity() +
+  scale_linetype_identity() +
+  scale_linewidth_identity() +
+  scale_x_reverse() +
+  transition_time(frameId) +
+  transition_reveal(frameId) +
+  ease_aes("linear") +
+  guides(fill = guide_legend(override.aes = list(size = 5.4))) +
+  labs(title = "Kansas City Chiefs @ Indianapolis Colts, 2022 NFL Week 3",
+       subtitle = desc1,
+       fill = NULL) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        plot.subtitle = element_text(size = 9.5, face = "italic", hjust = 0.5),
+        text = element_text(family = "Fira Sans", color = "#26282A"),
+        panel.grid = element_blank(),
+        legend.position = "top",
+        legend.margin = margin(b = -22),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+```
+
+]
+
+.pull-right[
+
+```{r}
+ex2 <- tracking |> 
+  filter(gameId == 2022102310, playId == 3897) |> 
+  mutate(first_frame = frameId[which(event == "line_set")][1],
+         last_frame = frameId[which(event == "touchdown")][1]) |> 
+  filter(frameId >= first_frame & frameId <= last_frame) |> 
+  mutate(
+    pt_size = ifelse(club == "football", 2.7, 5.4),
+    pt_fill_order = case_when(
+      club == "SF" ~ "2",
+      club == "KC" & nflId == "47839" ~ "3",
+      club == "KC" & nflId != "47839" ~ "1",
+      club == "football" ~ "4"
+    )
+  )
+
+club2 <- ex2 |> 
+  filter(club != "football")
+football2 <- ex2 |>
+  filter(club == "football")
+motion2 <- ex2 |>
+  filter(nflId == 47839) |>
+  mutate(motion_frame = frameId[which(event == "man_in_motion")][1],
+         snap_frame = frameId[which(event == "ball_snap")][1]) |>
+  mutate(motion_color = ifelse(frameId >= motion_frame - 10 & frameId <= snap_frame, "gold", "lightgray"),
+         motion_linetype = ifelse(frameId >= motion_frame - 10 & frameId <= snap_frame, "solid", "dashed"),
+         motion_linewidth = ifelse(frameId >= motion_frame - 10 & frameId <= snap_frame, 1.2, 0.4))
+desc2 <- ex2 |> 
+  distinct(gameId, playId) |> 
+  left_join(plays) |> 
+  mutate(playDescription = str_c("Q", quarter, ": ", playDescription),
+         playDescription = str_remove_all(playDescription, "\\.\\s.*"),
+         playDescription = str_replace_all(playDescription, "\\.", "\\. ")) |> 
+  pull(playDescription)
+```
+
+
+```{r}
+ggplot() +
+  annotate("rect",
+           xmin = 160/3,
+           xmax = 0,
+           ymin = 53,
+           ymax = 110,
+           fill = scales::alpha("#21ae5f", 0.9)) +
+  annotate("text", 
+           y = seq(60, 110, 10),
+           x = 10,
+           color = "white",
+           family = "Chivo",
+           label = c(seq(50, 10, -10), "G   "),
+           size = 6,
+           angle = 90) +
+  annotate("text", 
+           y = seq(60, 110, 10),
+           x = 40,
+           color = "white",
+           family = "Chivo",
+           label = c(seq(50, 10, -10), "   G"),
+           size = 6,
+           angle = 270) +
+  annotate("text", 
+           y = c(53:54, setdiff(seq(55, 110, 1), seq(55, 110, 5))),
+           x = 160/3,
+           color = "white",
+           label = "—") +
+  annotate("text", 
+           y = c(53:54, setdiff(seq(55, 110, 1), seq(55, 110, 5))),
+           x = 0,
+           color = "white",
+           label = "—") +
+  annotate("text", 
+           y = c(53:54, setdiff(seq(55, 110, 1), seq(55, 110, 5))),
+           x = 23.36667,
+           color = "white",
+           size = 3,
+           label = "—") +
+  annotate("text", 
+           y = c(53:54, setdiff(seq(55, 110, 1), seq(55, 110, 5))),
+           x = 29.96667,
+           color = "white",
+           size = 3,
+           label = "—") +
+  annotate("segment",
+           y = 55,
+           yend = 110,
+           x = c(160/3, 0),
+           xend = c(160/3, 0),
+           color = "white") +
+  geom_hline(yintercept = seq(55, 110, 5), color = "white") +
+  annotate("segment",
+           y = 70.4,
+           yend = 70.4,
+           x = 0,
+           xend = 160/3,
+           size = 1.5,
+           color = "#FDE725") +
+  annotate("segment",
+           y = 64.7,
+           yend = 64.7,
+           x = 0,
+           xend = 160/3,
+           size = 1.5,
+           color = "midnightblue") +
+  geom_point(data = club2, 
+             aes(y, x, fill = pt_fill_order, size = pt_size, group = nflId), shape = 21) +
+  geom_point(data = football2, 
+             aes(y, x, size = pt_size, group = nflId), fill = "#654321", shape = 21) +
+  geom_line(data = motion2, 
+            aes(y, x, color = motion_color, linetype = motion_linetype, linewidth = motion_linewidth)) +
+  scale_fill_manual(values = c("white", "#AA0000", "gold"),
+                    labels = c("KC", "SF", "Motion (M. Hardman)")) +
+  scale_size_identity() +
+  scale_color_identity() +
+  scale_linetype_identity() +
+  scale_linewidth_identity() +
+  scale_x_reverse() +
+  transition_time(frameId) +
+  transition_reveal(frameId) +
+  ease_aes("linear") +
+  guides(fill = guide_legend(override.aes = list(size = 5.4))) +
+  labs(title = "Kansas City Chiefs @ San Francisco 49ers, 2022 NFL Week 7",
+       subtitle = desc2,
+       fill = NULL) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        plot.subtitle = element_text(size = 9.5, face = "italic", hjust = 0.5),
+        text = element_text(family = "Fira Sans", color = "#26282A"),
+        panel.grid = element_blank(),
+        legend.position = "top",
+        legend.margin = margin(b = -22),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+```
+
+
+]
+
+
+
+
+
+
+

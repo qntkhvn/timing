@@ -17,18 +17,21 @@ knitr::opts_chunk$set(
 )
 ```
 
+---
+
 # Introduction
 
-Consider the following two pass plays by Kansas City Chiefs QB Patrick Mahomes in the 2022 NFL regular season.
+Consider the following two pass attempts by Kansas City Chiefs QB Patrick Mahomes in the 2022 NFL regular season.
 The first play (left) is a 9-yard pass to WR Marquez Valdes-Scantling for a first down in the second quarter of Colts vs Chiefs in week 3.
 The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster in the fourth quarter against the 49ers in week 7.
+In both plays, KC (in white) uses the same type of motion---glide, as the motion player (in gold) initially lines up in an outside wide alignment before moving laterally toward the inside.
 
 :::: {style="display: flex;"}
 
 ::: {}
 
 <center>
-<img src="../figures/ex1.gif">
+<img src="../figures/kelce_motion.gif">
 </center>
 
 :::
@@ -36,7 +39,7 @@ The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster in the fo
 ::: {}
 
 <center>
-<img src="../figures/ex2.gif">
+<img src="../figures/hardman_motion.gif">
 </center>
 
 
@@ -44,15 +47,16 @@ The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster in the fo
 
 ::::
 
-In both plays, KC (in white) uses the same type of motion---glide, as the motion player (in gold) lines up in an outside wide alignment, then motions toward the inside, and the football is snapped when the player is about halfway to the center.
-Yet, the plays apparently differ in the time between start of motion and ball snap.
-In the first play, the snap happens 3.6 seconds after Travis Kelce begins motioning, whereas in the second, only a half-second elapses since Mecole Hardman starts motioning.
+In both figures, the solid gold line along the motion player's movement path represents the path portion between the start of motion to the ball snap.
+It is apparent that the plays differ in the duration of this highlighted trajectory portion.
+In the first play, the snap happens 3.6 seconds after Travis Kelce begins his motion, whereas in the second, less than a second elapses since Mecole Hardman starts motioning.
 As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to anticipate, react, and time the ball snaps in a variety of situations, elevating the effectiveness of his teammates.
 
+Thus, in every play, it is important for the QB to synchronize the snap with the team's offensive execution, for the sake of keeping the defense off balance and offense in control.
 In this work, we focus on evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion.
-It is important for the QB to synchronize the snap with the team's offensive execution, keeping the defense off balance and offense in control.
+Our proposed framework culminates in a metric called STRAVA...
 
-[[I feel like we should emphasize the timing variability even more here]]
+[[TODO: talk more about the timing variability even more here?]]
 
 <!-- dictate the tempo of a play and exploit defensive vulnerabilities. -->
 
@@ -105,8 +109,8 @@ The observed timing between motion and snap on a single play is surely attributa
 To this end, we fit the following multilevel model:
 
 \begin{align*}
-  \delta_i  &\sim \textsf{Gamma}(\mu_i, \phi_i) \\
-  \log \mu_i &=\alpha_{q[i],m[i],d[i]} + \boldsymbol{\beta X_i} \\
+  \delta_i  &\sim \textsf{Gamma}(\lambda_i, \phi_i) \\
+  \log \lambda_i &=\alpha_{q[i],m[i],d[i]} + \boldsymbol{\beta X_i} \\
   \log \phi_i &=\alpha_{q[i]} \\
   \alpha_q  &\sim \textsf{Normal}(\mu_{\alpha_q}, \sigma^2_{\alpha_q}) && \small{\textrm{for quarterback}} &q &= 1, \dots, Q \\
   \alpha_m  &\sim \textsf{Normal}(\mu_{\alpha_m}, \sigma^2_{\alpha_m}) && \small{\textrm{for motion player}} &m &= 1, \dots, M \\
@@ -122,7 +126,7 @@ This can potentially help the offense control the game flow and exploit defensiv
 
 [[TODO: why is this interesting. Connect with the intro/motivation.]]
 
-For the mean parameter $\mu$, the model consists of random intercepts for the quarterback, motion player, and defensive team.
+For the mean parameter $\lambda$, the model consists of random intercepts for the quarterback, motion player, and defensive team.
 We also account for features about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol \beta$ as fixed effects.
 Specifically, we control for contextual information such as the current down, number of timeouts remaining for the offense, and play clock at the start of motion, since they can impact the timing between motion and snap.
 We also account for the motion player's position (WR, TE, RB/FB) and the number of players in motion since line-set, as these personnel information can relate to timing.
@@ -212,7 +216,7 @@ We have introduced...
 This work is not without limitations, leaving potential avenues for future work.
 To identify the start of motion, we use a threshold-based criterion which relies only a fraction of a player's top speed prior to the snap.
 This is certainly a simple viewpoint, as one could come up with a more rigid definition by building a model to predict the starting motion frame.
-There may also be room for improvement in clustering the motion types by having more refined features (e.g., [[TODO: what are these? (Ron, what were the things we talked about)]]), or alternatively using a functional clustering approach.
+There may also be room for improvement in clustering the motion types by having more refined features (e.g., [[TODO: what are these?]]), or alternatively using a functional clustering approach.
 
 # Appendix
 
