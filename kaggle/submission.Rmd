@@ -47,10 +47,7 @@ In the first play, the snap happens 3.6 seconds after Travis Kelce begins his mo
 As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to anticipate, react, and time the snaps in various situations, elevating KC offense's effectiveness.
 
 Thus, in every play, it is important for the quarterback to synchronize the snap with the team's offensive execution, in order to keep the defense off balance and offense in control.
-We propose a multilevel modeling framework for evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion.
-Our approach culminates in a novel metric called STRAVA, which assesses snap timing variability of NFL quarterbacks.
-
-<!-- dictate the tempo of a play and exploit defensive vulnerabilities. -->
+In this work, we propose a multilevel modeling framework for evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion, which culminates in a novel metric called STRAVA.
 
 <!-- Story:  -->
 
@@ -187,7 +184,7 @@ readRDS("../figures/corr_havoc.rds")
 
 # Discussion
 
-Variability in snap timing is an essential aspect for an offense to dictate the game and make it difficult for the defense to anticipate the play.
+Variability in snap timing is an essential aspect for an offense to dictate a play and make it difficult for the defense to anticipate and react.
 Through multilevel modeling, we have introduced STRAVA[^note], a measure of a quarterback's ability to maintain variable snap rhythm with their teammates' motion.
 We demonstrate that higher variability in snap timing is beneficial for the passing game, as it is associated with experiencing less defensive disruptions.
 
