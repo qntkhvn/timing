@@ -1,6 +1,6 @@
 ---
 title: |
-  | STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>HYTHM, <u>A</u>DAPTIVITY & <u>VA</u>RIABILITY
+  | STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>HYTHM, <u>A</u>DAPTABILITY & <u>VA</u>RIABILITY
 output: 
   html_document: 
     math_method: katex
@@ -21,42 +21,34 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Consider the following two pass attempts by Kansas City Chiefs QB Patrick Mahomes in the 2022 NFL regular season.
+Consider the following two pass attempts by Kansas City Chiefs quarterback Patrick Mahomes in the 2022 NFL regular season.
 The first play (left) is a 9-yard pass to WR Marquez Valdes-Scantling for a first down in the second quarter of Colts vs Chiefs in week 3.
 The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster in the fourth quarter against the 49ers in week 7.
 In both plays, KC (in white) uses the same type of motion---glide, as the motion player (in gold) initially lines up in an outside wide alignment before moving laterally toward the inside.
 
+<br>
+
 :::: {style="display: flex;"}
-
 ::: {}
-
 <center>
 <img src="../figures/kelce_motion.gif">
 </center>
-
 :::
-
 ::: {}
-
 <center>
 <img src="../figures/hardman_motion.gif">
 </center>
-
-
 :::
-
 ::::
 
-In both figures, the solid gold line along the motion player's movement path represents the path portion between the start of motion to the ball snap.
-It is apparent that the plays differ in the duration of this highlighted trajectory portion.
+In each figure, the solid gold line along the motion player's path represents the trajectory portion between the start of motion and the ball snap.
+It is apparent that the plays differ in the duration of this color-coded portion of the path.
 In the first play, the snap happens 3.6 seconds after Travis Kelce begins his motion, whereas in the second, less than a second elapses since Mecole Hardman starts motioning.
-As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to anticipate, react, and time the ball snaps in a variety of situations, elevating the effectiveness of his teammates.
+As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to anticipate, react, and time the ball snaps in various situations, elevating KC offense's effectiveness.
 
-Thus, in every play, it is important for the QB to synchronize the snap with the team's offensive execution, for the sake of keeping the defense off balance and offense in control.
-In this work, we focus on evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion.
-Our proposed framework culminates in a metric called STRAVA...
-
-[[TODO: talk more about the timing variability even more here?]]
+Thus, in every play, it is important for the quarterback to synchronize the snap with the team's offensive execution, in order to keep the defense off balance and offense in control.
+In this work, we propose a multilevel modeling framework for evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion.
+Our approach culminates in a novel metric called STRAVA which assesses snap timing variability of NFL quarterbacks.
 
 <!-- dictate the tempo of a play and exploit defensive vulnerabilities. -->
 
@@ -85,7 +77,7 @@ We define the snap timing $\delta$ for a play as the number of frames elapsed be
 That is,$$\delta = t_{\text{snap}} - t_{\text{motion}}\,.$$ 
 Note that in our analysis, we only consider **plays with players in motion at snap and running a route**.
 
-Here, it is straightforward to obtain $t_{\text{snap}}$ for each play using frame label in the tracking data.
+Here, it is straightforward to obtain $t_{\text{snap}}$ for each play using the frame label in the tracking data.
 Conversely, identifying $t_{\text{motion}}$ requires more efforts, due to [inconsistency between player-level motion indicators and annotated tracking events](https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709).
 
 We use the following procedure to determine $t_{\text{motion}}$ for each play. 
@@ -119,12 +111,10 @@ To this end, we fit the following multilevel model:
 
 In detail, we model the response $\delta_i > 0$ (snap timing for play $i$) with a Gamma distribution, which is well-suited for a positive, continuous variable like our case.
 
-We model the $\phi$ parameter, which represents the shape/variance of the distribution, with QB random effects.
+Of primary interest, we model the $\phi$ parameter, which represents the shape/variance of the distribution, with QB random effects.
 This allows us to examine the variability in timing among the quarterbacks.
 We hypothesize that a higher variability in timing is beneficial because it prevents defenses from predicting when the ball will be snapped.
-This can potentially help the offense control the game flow and exploit defensive vulnerabilities.
-
-[[TODO: why is this interesting. Connect with the intro/motivation.]]
+This accordingly allows the offense control the game flow and exploit defensive vulnerabilities.
 
 For the mean parameter $\lambda$, the model consists of random intercepts for the quarterback, motion player, and defensive team.
 We also account for features about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol \beta$ as fixed effects.
@@ -165,10 +155,9 @@ Once the clusters are identified, we can the label the motion types to add more 
 # Analysis
 
 Our model is fitted in a Bayesian framework via the `brms` `R` package using 4 parallel chains, each having 10,000 iterations and 5,000 burn-in draws.
-We perform diagnostics by computing the $\widehat R$ and effective sample size statistics and find no issues regarding model convergence and efficiency, respectively.
-Ultimately, we obtain the posterior distributions for our model parameters and perform the following analysis.
+We perform diagnostics by computing the $\widehat R$ and effective sample size statistics and find no issues regarding model convergence and efficiency.
+Ultimately, we obtain the posterior distributions for our model parameters and perform the following analysis, focusing on the shape/variance parameter.
 
-Of primary interest, we focus on the shape/variance parameter in our model.
 The following figure displays the posterior distributions for the QB random intercept (ordered by posterior means) for those with at least 50 pass attempts across the considered plays.
 
 Can we rename this? (like what ability is this?)
@@ -209,8 +198,9 @@ readRDS("../figures/corr_havoc.rds")
 
 # Discussion
 
-We have introduced...
+We have introduced STRAVA[^note]
 
+[^note]: On a personal note, QN failed to convince RY to name the metric STRAIN (Mahomes' version), where STRAIN stands for Snap Timing Rhythm and Adaptability INdex.
 
 
 This work is not without limitations, leaving potential avenues for future work.
@@ -222,4 +212,10 @@ There may also be room for improvement in clustering the motion types by having 
 
 All code is available at https://github.com/qntkhvn/timing.
 
-<!-- STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>HYTHM, <u>A</u>DAPTIVITY & <u>VA</u>RIABILITY -->
+---
+
+[Quang Nguyen](https://github.com/qntkhvn) and [Ron Yurko](https://github.com/ryurko)
+
+Department of Statistics & Data Science
+
+Carnegie Mellon University
