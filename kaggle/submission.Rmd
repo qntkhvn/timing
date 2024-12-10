@@ -125,8 +125,8 @@ This information, however, is not provided in the data, prompting us to consider
 Our clustering input contains tracking data features describing the motion player's location at different events relative to the ball-snapper's location before the snap.
 In particular, we compute the displacement in both horizontal (endzone) and vertical (sideline) directions between the motion player at ball-snap and the snapper.
 We also include the vertical displacement between the snapper and the motion player at both the start of motion and when they cross the line of scrimmage (LOS).
-If the motion player never crosses LOS on a play, we instead use the location at either the QB event (e.g., forward pass, sack, fumble) or 3 seconds after the snap, depending on which happens sooner.
-The aforementioned 3-second threshold is chosen using the observed distribution of the time elapsed from snap to crossing LOS for plays where motion players do cross LOS, as it captures a sufficiently large fraction (~95%) of the values.
+If the motion player never crosses the LOS on a play, we instead use the location at either the QB event (e.g., forward pass, sack, fumble) or 3 seconds after the snap, depending on which happens sooner.
+The aforementioned 3-second threshold is chosen using the observed distribution of the time elapsed from snap to crossing the LOS for plays where motion players do cross the LOS, as it captures a sufficiently large fraction (~95%) of the values.
 
 <!-- I prefer "snapper" to "center" here -->
 
@@ -144,7 +144,7 @@ Ultimately, we obtain posterior distributions for our model parameters (estimate
 ## Leaderboard
 
 The following figure displays the posterior distributions for the shape/variance random effect (ordered by posterior mean) for QBs with at least 50 pass attempts across the considered plays.
-For each player, the posterior mean of the aforementioned distribution provides an estimate for their ability to maintain variability in snap timing, **with higher posterior means corresponding to greater variability in timing between motion and snap**.
+For each player, the posterior mean of the aforementioned distribution provides an estimate for their ability to maintain variability in snap timing, **with higher posterior mean values corresponding to greater variability in timing between motion and snap**.
 
 Patrick Mahomes stands out as the top QB according our measure, adding the ability to time snaps as another element to his success.
 Other high-caliber QBs such as Josh Allen and Tom Brady are also among the top players in our rankings.
@@ -182,7 +182,7 @@ Our proposed framework is not without limitations.
 First, to identify the start of motion, we use a threshold-based criterion which relies only a fraction of a player's top speed prior to the snap.
 This is certainly a simple viewpoint, as one could come up with a more rigid definition by building a model to predict the starting motion frame.
 Further, despite the reasonable set of inputs in our proposed clustering algorithm, there is certainly room for improvement in identifying the motion types by having more refined features (e.g., [[TODO: fill these in. what are these?]]), or alternatively using a functional clustering approach.
-Since neither of these task is the main focus of our work, we leave these explorations for the future.
+Since neither of these tasks is the main focus of our work, we leave these explorations for the future.
 
 
 # Appendix {-}
