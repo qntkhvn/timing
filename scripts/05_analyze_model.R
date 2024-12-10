@@ -100,11 +100,14 @@ corr_havoc <- plays_havoc_rate_motion |>
   labs(x = "Posterior mean for QB shape random effect",
        y = "Havoc rate") +
   theme_light() +
-  annotate("segment", x = 0.26, y = 0.555, xend = 0.395, yend = 0.555, linewidth = 0.8,
+  annotate("segment", x = 0.26, y = 0.545, xend = 0.395, yend = 0.545, linewidth = 0.8,
            arrow = arrow(type = "closed", length = unit(0.02, "npc"))) +
-  annotate("text", x = -0.18, y = 0.555, hjust = 0,
-           label = "Higher snap timing variability",
-           family = "Fira Sans", fontface = "bold", size = rel(4)) +
+  # annotate("text", x = -0.18, y = 0.555, hjust = 0,
+  #          label = "Higher snap timing variability",
+  #          family = "Fira Sans", fontface = "bold", size = rel(4)) +
+  annotate("text", x = 0.245, y = 0.545, hjust = 1,
+           label = "Higher variability\nin snap timing",
+           family = "Fira Sans", fontface = "bold", size = rel(3.8)) +
   theme(panel.grid.minor = element_blank(),
         text = element_text(family = "Fira Sans"),
         axis.title = element_text(face = "bold", size = rel(1.2)),

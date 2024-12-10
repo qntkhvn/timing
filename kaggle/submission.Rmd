@@ -29,18 +29,20 @@ In both plays, KC (in white) uses the same type of motion---glide, as the motion
 
 :::: {style="display: flex;"}
 ::: {}
+<br>
 <center>
 <img src="../figures/kelce_motion.gif">
 </center>
 :::
 ::: {}
+<br>
 <center>
 <img src="../figures/hardman_motion.gif">
 </center>
 :::
 ::::
 
-In each figure, the solid gold line along the motion player's path represents the trajectory portion between the start of motion and the ball-snap.
+In each animation, the solid gold line along the motion player's path represents the trajectory portion between the start of motion and the ball-snap.
 It is apparent that the plays differ in the time duration of this color-coded portion of the path.
 In the first play, the snap happens 3.6 seconds after Travis Kelce begins his motion, whereas in the second, less than a second elapses since Mecole Hardman starts motioning.
 As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to react, anticipate, and time the snaps in various situations, elevating the effectiveness of the entire KC offensive unit.
@@ -96,23 +98,39 @@ We use the following procedure to determine $t_{\text{motion}}$ for each play.
 The observed timing between motion and snap on a single play is surely attributable to numerous variables---from contextual and spatiotemporal features, to the players and teams involved.
 To this end, we fit the following multilevel model:
 
-\begin{align*}
-  \delta_i  &\sim \textsf{Gamma}(\lambda_i, \phi_i) \\
-  \log \lambda_i &=\alpha_{q[i],m[i],d[i]} + \boldsymbol{\beta X_i} \\
-  \log \phi_i &=\alpha_{q[i]} \\
-  \alpha_q  &\sim \textsf{Normal}(\mu_{\alpha_q}, \sigma^2_{\alpha_q}) && \small{\textrm{for quarterback}} &q &= 1, \dots, Q \\
-  \alpha_m  &\sim \textsf{Normal}(\mu_{\alpha_m}, \sigma^2_{\alpha_m}) && \small{\textrm{for motion player}} &m &= 1, \dots, M \\
-  \alpha_d  &\sim \textsf{Normal}(\mu_{\alpha_d}, \sigma^2_{\alpha_d}) && \small{\textrm{for defensive team}} &d &= 1, \dots, D \\
-\end{align*}
+<!-- \begin{align*} -->
+<!--   \delta_i  &\sim \textsf{Gamma}(\lambda_i, \phi_i) \\ -->
+<!--   \log \lambda_i &=\alpha_{q[i],m[i],d[i]} + \boldsymbol{\beta X_i} \\ -->
+<!--   \log \phi_i &=\alpha_{q[i]} \\ -->
+<!--   \alpha_q  &\sim \textsf{Normal}(\mu_{\alpha_q}, \sigma^2_{\alpha_q}) && \small{\textrm{for quarterback}} &q &= 1, \dots, Q \\ -->
+<!--   \alpha_m  &\sim \textsf{Normal}(\mu_{\alpha_m}, \sigma^2_{\alpha_m}) && \small{\textrm{for motion player}} &m &= 1, \dots, M \\ -->
+<!--   \alpha_d  &\sim \textsf{Normal}(\mu_{\alpha_d}, \sigma^2_{\alpha_d}) && \small{\textrm{for defensive team}} &d &= 1, \dots, D \\ -->
+<!-- \end{align*} -->
 
-In detail, we model the response $\delta_i > 0$ (snap timing for play $i$) with a Gamma distribution, which is well-suited for a positive, continuous variable like our case.
+$$
+\begin{aligned}
+\delta_i  &\sim \textsf{Gamma}(\mu_i, \phi_i) \\
+\\
+\log \mu_i &= \alpha_0 + \boldsymbol{\beta X_i} + b_{q[i]} + b_{m_[i]} + b_{d[i]} \\
+b_q  &\sim \textsf{Normal}(0, \sigma^2_q)\\
+b_m  &\sim \textsf{Normal}(0, \sigma^2_m)\\
+b_d  &\sim \textsf{Normal}(0, \sigma^2_d)\\
+\\
+\log \phi_i &= \gamma_0 + u_{q[i]} \\
+u_q  &\sim \textsf{Normal}(0, \tau^2_q)\\
+\end{aligned}
+$$
+
+
+In detail, we model the response $\delta_i > 0$ (snap timing for play $i$) using a Gamma distribution (with log link function), which is well-suited for a positive, continuous variable like our case.
 
 Of primary interest, we model the $\phi$ parameter, which represents the shape/variance of the distribution, with QB random effects.
-This allows us to examine the variability in timing among NFL quarterbacks.
-We hypothesize that a higher variability in timing is beneficial because it prevents defenses from predicting when the ball will be snapped.
-This also allows the offense to control the game flow and exploit defensive vulnerabilities. <!-- #ShredIt https://x.com/BarstoolGruden/status/1858193718823522678 -->
+This allows us to examine the variability in timing between motion and snap among NFL quarterbacks.
+From an offensive standpoint, we hypothesize that a higher timing variability is beneficial because it prevents defenses from predicting when the ball will be snapped.
+This also allows the offense to control the game flow and exploit defensive vulnerabilities.
+<!-- insert shred it gruden gif https://x.com/BarstoolGruden/status/1858193718823522678 -->
 
-We also model the mean parameter $\lambda$ by including random intercepts for the quarterback, motion player, and defensive team.
+We also model the mean parameter $\mu$ by including random intercepts for three groups: quarterback $q$, motion player $m$, and defensive team $d$.
 Moreover, we account for contextual and personnel information about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol \beta$ as fixed effects.
 These include the current down, number of timeouts remaining for the offense, play clock at the start of motion, motion player's position (WR, TE, RB/FB), and number of players in motion since line-set, as they all can impact the timing between motion and snap.
 
@@ -123,8 +141,8 @@ For instance, in a play-action pass, a team can fake a jet sweep to set up the Q
 This information, however, is not provided in the data, prompting us to consider a clustering algorithm to identify the motion types.
 
 Our clustering input contains tracking data features describing the motion player's location at different events relative to the ball-snapper's location before the snap.
-In particular, we compute the displacement in both horizontal (endzone) and vertical (sideline) directions between the motion player at ball-snap and the snapper.
-We also include the vertical displacement between the snapper and the motion player at both the start of motion and when they cross the line of scrimmage (LOS).
+In particular, we compute the displacement in both sideline and endzone directions between the motion player at ball-snap and the snapper.
+We also include the displacement with respect to the sideline between the snapper and motion player at the start of motion as well as when they cross the line of scrimmage (LOS).
 If the motion player never crosses the LOS on a play, we instead use the location at either the QB event (e.g., forward pass, sack, fumble) or 3 seconds after the snap, depending on which happens sooner.
 The aforementioned 3-second threshold is chosen using the observed distribution of the time elapsed from snap to crossing the LOS for plays where motion players do cross the LOS, as it captures a sufficiently large fraction (~95%) of the values.
 
@@ -181,7 +199,7 @@ We demonstrate that higher variability in snap timing is beneficial for the pass
 Our proposed framework is not without limitations.
 First, to identify the start of motion, we use a threshold-based criterion which relies only a fraction of a player's top speed prior to the snap.
 This is certainly a simple viewpoint, as one could come up with a more rigid definition by building a model to predict the starting motion frame.
-Further, despite the reasonable set of inputs in our proposed clustering algorithm, there is certainly room for improvement in identifying the motion types by having more refined features (e.g., [[TODO: fill these in. what are these?]]), or alternatively using a functional clustering approach.
+Further, despite the reasonable set of inputs in our proposed clustering algorithm, there is certainly room for improvement in identifying the motion types by having more refined features, or alternatively using a functional clustering approach.
 Since neither of these tasks is the main focus of our work, we leave these explorations for the future.
 
 
