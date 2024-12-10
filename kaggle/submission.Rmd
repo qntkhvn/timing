@@ -50,25 +50,6 @@ As both plays result in significant gains (1 first down and 1 TD), this highligh
 Thus, in every play, it is important for the quarterback to synchronize the snap with the team's offensive execution, in order to keep the defense off balance and offense in control.
 In this work, **we propose a multilevel modeling framework to assess a passer's ability to adapt and align the snap with their team's pre-snap motion, culminating in a novel metric for evaluating QB snap timing variability**.
 
-<!-- Story:  -->
-
-<!-- higher variability = good?, give defense different looks -->
-
-<!-- vs always the same time / low var -> figure out when snaps are gonna be -> not good? (more "predictable") -->
-
-<!-- don't want defense to know when you're snapping -->
-
-<!-- wanna be deceptive? -->
-
-<!-- varying the amount of time between motion and snap -->
-
-<!-- correlate -->
-
-<!-- low var -> higher sack/havoc rate -> more vulnerable -->
-
-<!-- low var: easier to predict when the snap will be -->
-
-
 # Defining snap timing
 
 We define the snap timing $\delta$ for a play as the number of frames elapsed between the start of motion $(t_{\text{motion}})$ and the ball-snap $(t_{\text{snap}})$.
@@ -131,7 +112,7 @@ This also allows the offense to control the game flow and exploit defensive vuln
 <!-- insert shred it gruden gif https://x.com/BarstoolGruden/status/1858193718823522678 -->
 
 We also model the mean parameter $\mu$ by including random intercepts for three groups: quarterback $q$, motion player $m$, and defensive team $d$.
-Moreover, we account for contextual and personnel information about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol \beta$ as fixed effects.
+Moreover, we account for contextual and personnel information about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol\beta$ as fixed effects.
 These include the current down, number of timeouts remaining for the offense, play clock at the start of motion, motion player's position (WR, TE, RB/FB), and number of players in motion since line-set, as they all can impact the timing between motion and snap.
 
 ## Motion type clustering
