@@ -1,10 +1,10 @@
 ---
+# title: STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>HYTHM, <u>A</u>DAPTABILITY & <u>VA</u>RIABILITY
 title: |
-  | STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>HYTHM, <u>A</u>DAPTABILITY & <u>VA</u>RIABILITY
+  | Snap timing: I couldn't do that pre-game warm-up
 output: 
   html_document: 
     math_method: katex
-    number_sections: true
 ---
 
 ```{r}
@@ -26,8 +26,6 @@ The first play (left) is a 9-yard pass to WR Marquez Valdes-Scantling for a firs
 The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster against the 49ers in week 7.
 In both plays, KC (in white) uses the same type of motion---glide, as the motion players (in gold) initially line up in an outside wide alignment before moving laterally toward the inside.
 
-<br>
-
 :::: {style="display: flex;"}
 ::: {}
 <center>
@@ -42,12 +40,12 @@ In both plays, KC (in white) uses the same type of motion---glide, as the motion
 ::::
 
 In each figure, the solid gold line along the motion player's path represents the trajectory portion between the start of motion and the ball-snap.
-It is apparent that the plays differ in the duration of this color-coded portion of the path.
+It is apparent that the plays differ in the time duration of this color-coded portion of the path.
 In the first play, the snap happens 3.6 seconds after Travis Kelce begins his motion, whereas in the second, less than a second elapses since Mecole Hardman starts motioning.
-As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to anticipate, react, and time the snaps in various situations, elevating KC offense's effectiveness.
+As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to react, anticipate, and time the snaps in various situations, elevating the effectiveness of the entire KC offensive unit.
 
 Thus, in every play, it is important for the quarterback to synchronize the snap with the team's offensive execution, in order to keep the defense off balance and offense in control.
-In this work, we propose a multilevel modeling framework for evaluating a passer's ability to adapt and align the snap with their team's pre-snap motion, which culminates in a novel metric called STRAVA.
+In this work, we propose a multilevel modeling framework to assess a passer's ability to adapt and align the snap with their team's pre-snap motion, culminating in a novel metric for evaluating snap timing variability.
 
 <!-- Story:  -->
 
@@ -86,6 +84,8 @@ We use the following procedure to determine $t_{\text{motion}}$ for each play.
     *   We first observe the distribution for ratio between the speed at the `man_in_motion` event and the maximum speed between line-set and snap (only using plays with $t_{\text{motion}}$ identified earlier). 
 
     *   We then choose the average ratio value of 0.45 as the threshold for determining the start of motion for the remaining plays. Specifically, we assign $t_{\text{motion}}$ as the first frame between line-set and snap where the player reaches at least 45% of their top speed.
+    
+<!-- limitation of this is discussed in Discussion section -->
 
 
 # Multilevel model for snap timing
@@ -112,11 +112,10 @@ This also allows the offense to control the game flow and exploit defensive vuln
 We also model the mean parameter $\lambda$ by including random intercepts for the quarterback, motion player, and defensive team.
 Moreover, we account for contextual and personnel information about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol \beta$ as fixed effects.
 These include the current down, number of timeouts remaining for the offense, play clock at the start of motion, motion player's position (WR, TE, RB/FB), and number of players in motion since line-set, as they all can impact the timing between motion and snap.
+
 Another vital feature for modeling snap timing is the type of motion, since it relates to play design.
 For instance, in a play-action pass, a team can fake a jet sweep to set up the QB for a pass.
 This information, however, is not provided in the data, prompting us to consider a clustering algorithm to identify the motion types.
-
-<!-- a team may employ the jet motion to bring a receiver from one side of the formation to the other to create a favorable matchup. -->
 
 Our clustering input contains tracking data features describing the motion player's location at different events relative to the ball-snapper's location before the snap.
 In particular, we compute the absolute difference in both horizontal (endzone) and vertical (sideline) directions between the motion player at the moment of snap and the snapper.
@@ -124,44 +123,24 @@ We also include the vertical displacement between the snapper and the motion pla
 If the motion player never crosses LOS on a play, we instead use the location at either the QB event (e.g., forward pass, sack, fumble) or 3 seconds after the snap, depending on which happens sooner.
 The aforementioned 3-second threshold is chosen using the observed distribution of the time elapsed from snap to crossing LOS for plays where motion players do cross LOS, as it captures a sufficiently large fraction (~95%) of the values.
 
-<!-- 
-I prefer "snapper" to "center" here 
--->
+<!-- I prefer "snapper" to "center" here -->
 
 We use a Gaussian mixture model via the `mclust` `R` package to obtain unsupervised labels for the pre-snap motions.
-We choose the optimal number of clusters using BIC (resulting in 7 clusters), and verify that the cluster assignments are reasonable by visualizing the motion trajectory of players in each cluster.
+We choose the optimal number of clusters using BIC (resulting in 7 clusters), and validate the cluster assignment results by visualizing the player motion trajectories in each cluster.
 
-
-<!--
-I'm putting limitations of this clustering approach in the discussion
--->
-
-<!-- Still, this is just a starting point for identifying the different types of motion, as one could perform more sophisticated feature engineering or clustering algorithm to achieve more accurate cluster assignments. -->
-<!-- Since designing the best clustering algorithm is not the main focus of our work, we leave this exploration for future work. -->
-
-<!-- The focus of our approach is not in designing the best clustering algorithm; something reasonable should be enough. (verified with visual inspection...) -->
-
-<!-- Our model-based clustering algorithm provides a reasonable starting point for identifying the different types of motion. -->
-
-
-
-
-<!-- 
-a finite mixture of 7 ellipsoidal multivariate Gaussian distributions with varying volume, shape, and orientation (VVV model)
-Once the clusters are identified, we can the label the motion types to add more context to our cluster assignments.
--->
+<!-- limitation of this is discussed in Discussion section -->
 
 # Analysis
 
-Our multilevel model is fitted in a Bayesian framework via the `brms` `R` package using 4 parallel chains, each having 10,000 iterations and 5,000 burn-in draws.
-We perform diagnostics by computing the $\widehat R$ and effective sample size statistics and find no issues regarding model convergence and efficiency.
-Ultimately, we obtain the posterior distributions for our model parameters and perform the following analysis, focusing on the shape/variance parameter.
+Our multilevel model is fitted in a Bayesian framework via the `brms` `R` package using 4 parallel chains of 10,000 iterations and 5,000 burn-in draws.
+We perform diagnostics by visually inspecting trace plots as well as computing the $\widehat R$ and effective sample size statistics, and find no issues with model convergence and efficiency.
+Ultimately, we obtain posterior distributions for our model parameters (estimated using MCMC) and perform the following analysis, **focusing on the shape/variance parameter**.
 
-The following figure displays the posterior distributions for the QB random intercept (ordered by posterior mean) for those with at least 50 pass attempts across the considered plays.
-For each player, their posterior mean provides an estimate for their ability to maintain rhythm, adaptability and variability in snap timing, hence we call this metric **STRAVA**.
-We see that Patrick Mahomes ranks first according to STRAVA, as his ability to time snaps stands out as another element to his success.
-We also notice other high-caliber QBs such as Josh Allen and Tom Brady among the top players in our rankings.
-Note that there is considerable uncertainty in our estimate, as indicated by the rather wide credible intervals, which is unsurprising given our limited sample of motion plays.
+The following figure displays the posterior distributions for the shape/variance random effect (ordered by posterior mean) for QBs with at least 50 pass attempts across the considered plays.
+For each player, the posterior mean of the shape/variance provides an estimate for their ability to maintain variability in snap timing, **with higher posterior mean values corresponding to greater variability in timing between motion and snap**.
+Patrick Mahomes stands out as the top QB according our measure, adding the ability to time snaps as another element to his success.
+Other high-caliber QBs such as Josh Allen and Tom Brady are also among the top players in our rankings.
+Note that there is considerable uncertainty in our estimate, as indicated by the somewhat wide credible intervals, which is unsurprising given our limited sample of motion plays.
 
 ```{r}
 #| fig-height: 8
@@ -169,12 +148,12 @@ Note that there is considerable uncertainty in our estimate, as indicated by the
 readRDS("../figures/posteriors_slab.rds")
 ```
 
-Next, we examine the relationship between the aforementioned QB posterior means (i.e. STRAVA) and a measure of "havoc rate". 
+Next, we examine the relationship between the posterior mean for the QB shape/variance random effect and a measure of "havoc rate".
 Here, a havoc event is defined as whether any of the following outcomes are generated on a play: pass breakup, forced fumble, tackle for loss, interception, sack, and pressure.
-The figure below is a scatterplot of STRAVA and havoc rate for all passing plays (left) and only the considered motion plays (right) during the first nine weeks of the 2022 NFL regular season.
-We observe that lower snap timing variability corresponds to higher rate of facing disruptive events created by the opposing defense.
+The figure below is a scatterplot of the havoc rate and aforementioned posterior mean for the same subset of QBs from earlier across all passing plays from the first nine weeks of the 2022 NFL season (left) and only the considered motion plays (right).
+We observe that lower snap timing variability corresponds to higher rate of facing havoc events created by the opposing defense.
 This makes intuitive sense, as when there is little variability in timing, the offense is likely to be predictable and experience unfavorable play outcomes.
-In contrast, by varying the timing, offenses can create uncertainty, forcing defenders to play more cautiously which reduces their effectiveness in executing disruptive plays.
+In contrast, by varying the duration between motion and snap, offenses can create uncertainty, forcing defenders to play more cautiously which reduces their effectiveness in executing disruptive plays.
 
 ```{r}
 #| fig-height: 4.5
@@ -184,16 +163,16 @@ readRDS("../figures/corr_havoc.rds")
 
 # Discussion
 
-Variability in snap timing is an essential aspect for an offense to dictate a play and make it difficult for the defense to anticipate and react.
-Through multilevel modeling, we have introduced STRAVA[^note], a measure of a quarterback's ability to maintain variable snap rhythm with their teammates' motion.
-We demonstrate that higher variability in snap timing is beneficial for the passing game, as it is associated with experiencing less defensive disruptions.
+Variability in snap timing is an essential aspect for an offense to dictate plays and make it difficult for the defense to anticipate and react.
+Through multilevel modeling, we provide an assessment of a quarterback's ability to maintain variable snap timing with their teammates' motion.
+We demonstrate that higher variability in snap timing is beneficial for the passing game, as it relates to experiencing less disruptions generated by the defense.
 
 Our proposed framework is not without limitations.
-To identify the start of motion, we use a threshold-based criterion which relies only a fraction of a player's top speed prior to the snap.
+First, to identify the start of motion, we use a threshold-based criterion which relies only a fraction of a player's top speed prior to the snap.
 This is certainly a simple viewpoint, as one could come up with a more rigid definition by building a model to predict the starting motion frame.
-There may also be room for improvement in clustering the motion types by having more refined features (e.g., [[TODO: what are these?]]), or alternatively using a functional clustering approach.
+Further, despite the reasonable set of inputs in our proposed clustering algorithm, there is certainly room for improvement in identifying the motion types by having more refined features (e.g., [[TODO: fill these in. what are these?]]), or alternatively using a functional clustering approach.
+Since either of these task is the main focus of our work, we leave these explorations for the future.
 
-[^note]: On a personal note, QN failed to convince RY to name the metric STRAIN (Mahomes' version), where STRAIN stands for Snap Timing Rhythm and Adaptability INdex.
 
 # Appendix
 
@@ -206,3 +185,7 @@ All code is available at https://github.com/qntkhvn/timing.
 Department of Statistics & Data Science
 
 Carnegie Mellon University
+
+---
+
+On a personal note, QN failed to convince RY to name the metric STRAIN (Mahomes' version), where STRAIN stands for Snap Timing Rhythm and Adaptability INdex.
