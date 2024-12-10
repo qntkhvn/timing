@@ -46,7 +46,7 @@ In the first play, the snap happens 3.6 seconds after Travis Kelce begins his mo
 As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to react, anticipate, and time the snaps in various situations, elevating the effectiveness of the entire KC offensive unit.
 
 Thus, in every play, it is important for the quarterback to synchronize the snap with the team's offensive execution, in order to keep the defense off balance and offense in control.
-In this work, **we propose a multilevel modeling framework to assess a passer's ability to adapt and align the snap with their team's pre-snap motion, culminating in a novel metric for evaluating snap timing variability**.
+In this work, **we propose a multilevel modeling framework to assess a passer's ability to adapt and align the snap with their team's pre-snap motion, culminating in a novel metric for evaluating QB snap timing variability**.
 
 <!-- Story:  -->
 
@@ -141,7 +141,7 @@ Our multilevel model is fitted in a Bayesian framework via the `brms` `R` packag
 We perform diagnostics by visually inspecting trace plots as well as computing the $\widehat R$ and effective sample size statistics, and find no issues with model convergence and efficiency.
 Ultimately, we obtain posterior distributions for our model parameters (estimated using MCMC) and perform the following analysis.
 
-## QB snap timing variability leaderboard
+## Leaderboard
 
 The following figure displays the posterior distributions for the shape/variance random effect (ordered by posterior mean) for QBs with at least 50 pass attempts across the considered plays.
 For each player, the posterior mean of the aforementioned distribution provides an estimate for their ability to maintain variability in snap timing, **with higher posterior means corresponding to greater variability in timing between motion and snap**.
@@ -156,10 +156,10 @@ Note that there is considerable uncertainty in our estimates, as demonstrated by
 readRDS("../figures/posteriors_slab.rds")
 ```
 
-## Comparison to rate of havoc events
+## Comparison to havoc rate
 
 Next, we examine the relationship between the posterior mean for the QB shape/variance random effect and a measure of "havoc rate".
-Here, a havoc event is defined as whether any of the following outcomes are generated on a play: pass breakup, forced fumble, tackle for loss, interception, sack, and pressure.
+Here, a havoc event is defined as whether any of the following defensive outcomes are generated on a play: pass breakup, forced fumble, tackle for loss, interception, sack, and pressure.
 The figure below is a scatterplot of the havoc rate and aforementioned posterior mean for the same subset of QBs from earlier across all passing plays from the first nine weeks of the 2022 NFL season (left) and only the considered motion plays (right).
 
 **We observe that lower snap timing variability corresponds to higher rate of facing havoc events created by the opposing defense.**

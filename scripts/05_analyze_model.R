@@ -43,7 +43,10 @@ posteriors_slab <- snap_timing_fit |>
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_line(color = "gray95"),
         text = element_text(color = "black"),
-        axis.text.y = element_text(face = "bold", size = rel(1.15), color = "black"),
+        plot.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold", size = rel(1.1), color = "black"),
+        axis.title.x = element_text(face = "bold"),
         legend.position = "bottom",
         legend.margin = margin(t = -3))
 
@@ -92,11 +95,16 @@ corr_havoc <- plays_havoc_rate_motion |>
               linetype = "dashed") +
   geom_point(alpha = 0.6, size = 3.5, aes(color = I(team_color))) +
   ggrepel::geom_text_repel(aes(label = passer_player_name), 
-                           family = "Fira Sans", size = rel(3.2), seed = 6) +
+                           family = "Fira Sans", size = rel(3.2), seed = 31) +
   facet_wrap(~ play_subset) +
   labs(x = "Posterior mean for QB shape random effect",
        y = "Havoc rate") +
   theme_light() +
+  annotate("segment", x = 0.26, y = 0.555, xend = 0.395, yend = 0.555, linewidth = 0.8,
+           arrow = arrow(type = "closed", length = unit(0.02, "npc"))) +
+  annotate("text", x = -0.18, y = 0.555, hjust = 0,
+           label = "Higher snap timing variability",
+           family = "Fira Sans", fontface = "bold", size = rel(4)) +
   theme(panel.grid.minor = element_blank(),
         text = element_text(family = "Fira Sans"),
         axis.title = element_text(face = "bold", size = rel(1.2)),
