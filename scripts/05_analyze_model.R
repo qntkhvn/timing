@@ -34,6 +34,11 @@ posteriors_slab <- snap_timing_fit |>
   scale_color_manual(values = MetBrewer::met.brewer("VanGogh3"),
                      labels = c("95%", "80%", "50%")) +
   coord_cartesian(xlim = c(-0.9, 0.9)) +
+  annotate("segment", x = 0.505, y = 1, xend = 0.98, yend = 1, linewidth = 0.7,
+           arrow = arrow(type = "closed", length = unit(0.015, "npc"))) +
+  annotate("text", x = 0.99, y = 1.8, hjust = 1, lineheight = 1,
+           label = "Higher variability\nin snap timing",
+           family = "Fira Sans", fontface = "bold", size = rel(3.6)) +
   labs(x = "QB shape random effect",
        y = NULL,
        color = "Credible Interval",
@@ -99,14 +104,11 @@ corr_havoc <- plays_havoc_rate_motion |>
   labs(x = "Posterior mean for QB shape random effect",
        y = "Havoc rate") +
   theme_light() +
-  annotate("segment", x = 0.21, y = 0.555, xend = 0.32, yend = 0.555, linewidth = 0.7,
+  annotate("segment", x = 0.115, y = 0.528, xend = 0.33, yend = 0.528, linewidth = 0.7,
            arrow = arrow(type = "closed", length = unit(0.02, "npc"))) +
-  # annotate("text", x = -0.18, y = 0.555, hjust = 0,
-  #          label = "Higher snap timing variability",
-  #          family = "Fira Sans", fontface = "bold", size = rel(4)) +
-  annotate("text", x = 0.195, y = 0.555, hjust = 1, lineheight = 1,
+  annotate("text", x = 0.33, y = 0.55, hjust = 1, lineheight = 1,
            label = "Higher variability\nin snap timing",
-           family = "Fira Sans", fontface = "bold", size = rel(3.7)) +
+           family = "Fira Sans", fontface = "bold", size = rel(3.6)) +
   theme(panel.grid.minor = element_blank(),
         text = element_text(family = "Fira Sans"),
         axis.title = element_text(face = "bold", size = rel(1.2)),
