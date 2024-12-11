@@ -1,7 +1,7 @@
 ---
 # title: STRAVA: <u>S</u>NAP <u>T</u>IMING <u>R</u>HYTHM, <u>A</u>DAPTABILITY & <u>VA</u>RIABILITY
 title: |
-  | Snap timing: I couldn't do that pre-game warm-up
+  | Down, set, hut! Explaining variability in snap cadence on plays with motion
 output: 
   html_document: 
     math_method: katex
@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 # Introduction
 
 Consider the following two pass attempts by Kansas City Chiefs quarterback Patrick Mahomes in the 2022 NFL regular season.
-The first play (left) is a 9-yard pass to WR Marquez Valdes-Scantling for a first down during Colts vs Chiefs in week 3.
+The first play (left) is a 9-yard pass to WR Marquez Valdes-Scantling for a first down against the Colts in week 3.
 The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster against the 49ers in week 7.
 In both plays, KC (in white) uses the same type of motion---glide, as the motion players (in gold) initially line up in an outside wide alignment before moving laterally toward the inside.
 
@@ -45,19 +45,19 @@ In both plays, KC (in white) uses the same type of motion---glide, as the motion
 In each animation, the solid gold line along the motion player's path represents the trajectory portion between the start of motion and the ball-snap.
 It is apparent that the plays differ in the time duration of this color-coded portion of the path.
 In the first play, the snap happens 3.6 seconds after Travis Kelce begins his motion, whereas in the second, less than a second elapses since Mecole Hardman starts motioning.
-As both plays result in significant gains (1 first down and 1 TD), this highlights Mahomes' ability to react, anticipate, and time the snaps in various situations, elevating the effectiveness of the entire KC offensive unit.
+As both plays result in significant gains (a first down and touchdown), this highlights Mahomes' ability to react, anticipate, and time the snaps in various situations, elevating the effectiveness of the entire KC offensive unit.
 
 Thus, in every play, it is important for the quarterback to synchronize the snap with the team's offensive execution, in order to keep the defense off balance and offense in control.
-In this work, **we propose a multilevel modeling framework to assess a passer's ability to adapt and align the snap with their team's pre-snap motion, culminating in a novel metric for evaluating QB snap timing variability**.
+In this work, **we propose a multilevel modeling framework to assess a passer's ability to adapt and align the snap with their team's pre-snap motion, culminating in a novel approach for measuring variability in QB snap timing**.
 
 # Defining snap timing
 
 We define the snap timing $\delta$ for a play as the number of frames elapsed between the start of motion $(t_{\text{motion}})$ and the ball-snap $(t_{\text{snap}})$.
 That is,$$\delta = t_{\text{snap}} - t_{\text{motion}}\,.$$ 
-Note that in our analysis, we only consider **plays with players in motion at snap and running a route**.
+Note that in our analysis, we only consider **plays with receivers in motion at snap and that are running a route**.
 
 Here, it is straightforward to obtain $t_{\text{snap}}$ for each play using the frame label in the tracking data.
-Conversely, identifying $t_{\text{motion}}$ requires more efforts, due to [inconsistency between player-level motion indicators and annotated tracking events](https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709).
+Conversely, identifying $t_{\text{motion}}$ requires more effort, due to [inconsistency between player-level motion indicators and annotated tracking events](https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709).
 
 We use the following procedure to determine $t_{\text{motion}}$ for each play. 
 
@@ -134,8 +134,8 @@ The aforementioned 3-second threshold is chosen using the observed distribution 
 
 <!-- I prefer "snapper" to "center" here -->
 
-We use a Gaussian mixture model via the `mclust` `R` package to obtain unsupervised labels for the pre-snap motions.
-We choose the optimal number of clusters using BIC, and validate the cluster assignment results by visualizing the player motion trajectories in each cluster.
+We fit a Gaussian mixture model via the `mclust` `R` package to obtain unsupervised labels for the pre-snap motions.
+We choose the optimal number of Gaussian clusters using BIC, and validate the cluster assignment results by visualizing the player motion trajectories in each cluster.
 
 <!-- limitation of this is discussed in Discussion section -->
 
@@ -143,7 +143,7 @@ We choose the optimal number of clusters using BIC, and validate the cluster ass
 
 Our multilevel model is fitted in a Bayesian framework via the `brms` `R` package using 4 parallel chains of 10,000 iterations and 5,000 burn-in draws.
 We perform diagnostics by visually inspecting trace plots as well as computing the $\widehat R$ and effective sample size statistics, and find no issues with model convergence and efficiency.
-Ultimately, we obtain posterior distributions for our model parameters (estimated using MCMC) and perform the following analysis.
+Ultimately, we obtain posterior distributions for our model parameters and perform the following analysis.
 
 ## Leaderboard
 
@@ -152,7 +152,7 @@ For each player, the posterior mean of the aforementioned distribution provides 
 
 Patrick Mahomes stands out as the top QB according our measure, adding the ability to time snaps as another element to his success.
 Other high-caliber QBs such as Tom Brady and Josh Allen are also among the top players in our rankings.
-Note that there is considerable uncertainty in our estimates, as demonstrated by the rather wide credible intervals, which is unsurprising given our limited sample of motion plays.
+Note that there is considerable uncertainty in our estimates, as demonstrated by the rather wide credible intervals, which is unsurprising given our limited sample of motion plays. However, we still observe substantial differences in the credible intervals across this selection of QBs. For instance, despite his pay, Daniel Jones 95% credible interval does not overlap at all with the 95% credible intervals of the top five QBs.
 
 ```{r}
 #| fig-height: 8
@@ -203,4 +203,4 @@ Carnegie Mellon University
 
 ---
 
-On a personal note, QN failed to convince RY to name the metric STRAIN (Mahomes' version), where STRAIN stands for Snap Timing Rhythm and Adaptability INdex.
+On a personal note, QN failed to convince RY to name the metric _STRAIN (Patrick's version)_, where STRAIN stands for Snap Timing Rhythm and Adaptability INdex.
