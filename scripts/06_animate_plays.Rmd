@@ -425,13 +425,13 @@ ggplot() +
            arrow = arrow(type = "closed", ends = "both", length = unit(0.015, "npc")),
            color = "black") +
   annotate("text", x = 15.5, y = 22.7, color = "white", family = "Fira Sans", size = 4.5,
-           label = TeX("$M_{sideline}$")) +
+           label = TeX("$\\textbf{M_{sideline}}$")) +
   annotate("text", x = 21.3, y = 24, color = "white", family = "Fira Sans", size = 4.5,
-           label = TeX("$S_{sideline}$")) +
+           label = TeX("$\\textbf{S_{sideline}}$")) +
   annotate("text", x = 26.5, y = 25.5, color = "white", family = "Fira Sans", size = 4.5,
-           label = TeX("$S_{endzone}$")) +
+           label = TeX("$\\textbf{S_{endzone}}$")) +
   annotate("text", x = 21.3, y = 28.5, color = "white", family = "Fira Sans", size = 4.5,
-           label = TeX("$L_{sideline}$")) +
+           label = TeX("$\\textbf{L_{sideline}}$")) +
   scale_fill_manual(values = c("white", "gold"),
                     labels = c("Snapper (C. Humphrey)", "Motion (T. Kelce)")) +
   scale_size_identity() +

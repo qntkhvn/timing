@@ -135,7 +135,7 @@ The aforementioned 3-second threshold is chosen using the observed distribution 
 <!-- I prefer "snapper" to "center" here -->
 
 We use a Gaussian mixture model via the `mclust` `R` package to obtain unsupervised labels for the pre-snap motions.
-We choose the optimal number of clusters using BIC (resulting in 10 clusters), and validate the cluster assignment results by visualizing the player motion trajectories in each cluster.
+We choose the optimal number of clusters using BIC, and validate the cluster assignment results by visualizing the player motion trajectories in each cluster.
 
 <!-- limitation of this is discussed in Discussion section -->
 
