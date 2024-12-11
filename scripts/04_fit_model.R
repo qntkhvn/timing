@@ -36,12 +36,6 @@ snap_timing_fit <- brm(
   data = plays_snap_timing
 )
 
-fit <- brm(
-  bf(y ~ factor(var1) + var2 + factor(var3) + factor(var3) + var4 + factor(var5) +
-      (1 | group1) + (1 | group2) + (1 | group3),
-    shape ~ (1 | group1)),
-  data = df)
-
 # model diagnostics
 snap_timing_fit |> 
   brms::rhat() |> 

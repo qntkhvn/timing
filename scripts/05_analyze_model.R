@@ -52,7 +52,6 @@ posteriors_slab <- snap_timing_fit |>
 
 # write_rds(posteriors_slab, "figures/posteriors_slab.rds", compress = "gz")
 
-
 plays_havoc <- player_play |> 
   mutate(havoc = (passDefensed + forcedFumbleAsDefense + tackleForALoss + hadInterception +
                     (halfSackYardsAsDefense < 0) + (sackYardsAsDefense < 0) + causedPressure) > 0) |>
@@ -85,13 +84,13 @@ corr_havoc <- plays_havoc_rate_motion |>
   mutate(
     passer_player_name = str_replace(passer_player_name, "\\.", "\\. "),
     play_subset = ifelse(play_subset == "motion", 
-                         "Considered motion plays (r = –0.40)", "All pass plays (r = –0.52)")
+                         "Considered motion plays (r = –0.33)", "All pass plays (r = –0.48)")
   ) |> 
   # group_by(play_subset) |> summarize(cor(posterior_mean_shape, havoc_rate))
   ggplot(aes(posterior_mean_shape, havoc_rate)) +
   geom_smooth(method = lm, se = FALSE,
               color = "gray",
-              xseq = c(-0.45, 0.38),
+              xseq = c(-0.49, 0.32),
               linetype = "dashed") +
   geom_point(alpha = 0.6, size = 3.5, aes(color = I(team_color))) +
   ggrepel::geom_text_repel(aes(label = passer_player_name), 
@@ -100,14 +99,14 @@ corr_havoc <- plays_havoc_rate_motion |>
   labs(x = "Posterior mean for QB shape random effect",
        y = "Havoc rate") +
   theme_light() +
-  annotate("segment", x = 0.26, y = 0.545, xend = 0.395, yend = 0.545, linewidth = 0.8,
+  annotate("segment", x = 0.21, y = 0.555, xend = 0.32, yend = 0.555, linewidth = 0.7,
            arrow = arrow(type = "closed", length = unit(0.02, "npc"))) +
   # annotate("text", x = -0.18, y = 0.555, hjust = 0,
   #          label = "Higher snap timing variability",
   #          family = "Fira Sans", fontface = "bold", size = rel(4)) +
-  annotate("text", x = 0.245, y = 0.545, hjust = 1,
+  annotate("text", x = 0.195, y = 0.555, hjust = 1, lineheight = 1,
            label = "Higher variability\nin snap timing",
-           family = "Fira Sans", fontface = "bold", size = rel(3.8)) +
+           family = "Fira Sans", fontface = "bold", size = rel(3.7)) +
   theme(panel.grid.minor = element_blank(),
         text = element_text(family = "Fira Sans"),
         axis.title = element_text(face = "bold", size = rel(1.2)),

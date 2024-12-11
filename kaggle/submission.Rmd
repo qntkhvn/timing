@@ -129,13 +129,13 @@ We also include the displacement with respect to the sideline between the snappe
 <img src="../figures/clustering_features.png" style="width:50%">
 </center>
 
-Note that for plays where the motion player never crosses the LOS, we instead use the location at either the QB event (e.g., forward pass, sack, fumble) or 3 seconds after the snap, depending on which happens sooner.
-The aforementioned 3-second threshold is chosen using the observed distribution of the time elapsed from snap to crossing the LOS for plays where motion players do cross the LOS, as it captures a sufficiently large fraction (~95%) of the values.
+Note that for plays where the motion player never crosses the LOS, we instead use their location at either the QB event (e.g., forward pass, sack, fumble) or 3 seconds after the snap (depending on which happens sooner) in place of $\textsf{L}_{\textsf{sideline}}$.
+The aforementioned 3-second threshold is chosen using the observed distribution of the time elapsed from snap to crossing LOS for plays where motion players do cross the LOS, as it captures a sufficiently large fraction (~95%) of the values.
 
 <!-- I prefer "snapper" to "center" here -->
 
 We use a Gaussian mixture model via the `mclust` `R` package to obtain unsupervised labels for the pre-snap motions.
-We choose the optimal number of clusters using BIC (resulting in 7 clusters), and validate the cluster assignment results by visualizing the player motion trajectories in each cluster.
+We choose the optimal number of clusters using BIC (resulting in 10 clusters), and validate the cluster assignment results by visualizing the player motion trajectories in each cluster.
 
 <!-- limitation of this is discussed in Discussion section -->
 
@@ -151,7 +151,7 @@ The following figure displays the posterior distributions for the shape/variance
 For each player, the posterior mean of the aforementioned distribution provides an estimate for their ability to maintain variability in snap timing, **with higher posterior mean values corresponding to greater variability in timing between motion and snap**.
 
 Patrick Mahomes stands out as the top QB according our measure, adding the ability to time snaps as another element to his success.
-Other high-caliber QBs such as Josh Allen and Tom Brady are also among the top players in our rankings.
+Other high-caliber QBs such as Tom Brady and Josh Allen are also among the top players in our rankings.
 Note that there is considerable uncertainty in our estimates, as demonstrated by the rather wide credible intervals, which is unsurprising given our limited sample of motion plays.
 
 ```{r}
@@ -171,7 +171,7 @@ This makes intuitive sense, as when there is little variability in timing, the o
 In contrast, by varying the duration between motion and snap, offenses can create uncertainty, forcing defenders to play more cautiously which reduces their effectiveness in executing disruptive plays.
 
 ```{r}
-#| fig-height: 4.5
+#| fig-height: 4.1
 #| fig-width: 10
 readRDS("../figures/corr_havoc.rds")
 ```

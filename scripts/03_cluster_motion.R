@@ -1,38 +1,40 @@
 source("scripts/02_identify_motion.R")
 
-# get players that did not cross LOS when qb event happens
-plays_cross_los_indicator <- tracking_players_motion_at_snap |>
+# what is the first frame the motion cross LOS (if any)
+plays_cross_los <- tracking_players_motion_at_snap |>
   filter(!is.na(frame_qb_event)) |>
   left_join(select(play_context, gameId, playId, yardline_100)) |>
   mutate(x_los = 110 - yardline_100) |>
   filter(frameId >= frame_snap & frameId <= frame_qb_event) |>
   group_by(gameId, playId, nflId) |>
-  summarize(n_cross_los = sum(x > x_los)) |>
-  ungroup() |>
-  mutate(i_cross_loss = ifelse(n_cross_los == 0, 0, 1)) |>
-  select(-n_cross_los)
+  summarize(frame_cross_los = frameId[which(x > x_los)][1]) |> 
+  ungroup()
 
-# what is the first frame when they cross LOS?
-plays_cross_los_frame <- tracking_players_motion_at_snap |>
-  filter(!is.na(frame_qb_event)) |>
-  left_join(select(play_context, gameId, playId, yardline_100)) |>
-  mutate(x_los = 110 - yardline_100) |>
-  filter(frameId >= frame_snap & frameId <= frame_qb_event) |>
-  filter(x > x_los) |>
-  group_by(gameId, playId, nflId) |>
-  slice_min(frameId) |>
-  ungroup() |>
-  select(gameId, playId, nflId, frame_cross_los = frameId)
 
 # distribution for time between snap from snap to moment of crossing the LOS 
 # find a threshold that captures most of the values
-plays_cross_los_frame |>
+plays_cross_los |>
+  drop_na() |> 
   inner_join(plays_motion) |>
   mutate(frame_snap_to_cross_los = frame_cross_los - frame_snap) |>
   ggplot(aes(frame_snap_to_cross_los)) +
   geom_histogram() +
   geom_vline(xintercept = 30, linetype = "dashed")
 
+# for plays where motion player did not cross LOS
+# use min frame {qb event, snap + 30}
+plays_never_cross_los <- tracking_players_motion_at_snap |> 
+  distinct(gameId, playId, nflId, frame_qb_event, frame_3s_after_snap = frame_snap + 30) |> 
+  rowwise() |> 
+  mutate(frame_end = min(frame_qb_event, frame_3s_after_snap)) |> 
+  inner_join(filter(plays_cross_los, is.na(frame_cross_los))) |> 
+  select(gameId:nflId, frame_end)
+
+# combine two tables together
+plays_frame_end <- plays_cross_los |> 
+  filter(!is.na(frame_cross_los)) |> 
+  rename(frame_end = frame_cross_los) |> 
+  bind_rows(plays_never_cross_los)
 
 # derive features for clustering
 
@@ -59,12 +61,9 @@ tracking_passer <- tracking |>
 
 # get player location tracking features
 plays_locations <- plays_motion |>
-  inner_join(plays_cross_los_indicator) |>
-  left_join(plays_cross_los_frame) |>
-  mutate(frame_end = ifelse(i_cross_loss == 0, frame_qb_event, frame_cross_los),
-         frame_end_cap = ifelse(i_cross_loss == 0 & frame_end - frame_snap > 30, 30, frame_end)) |>
+  inner_join(plays_frame_end) |> 
   select(gameId, playId, nflId, 
-         frame_line_set, frame_motion, frame_snap, frame_end = frame_end_cap) |> 
+         frame_line_set, frame_motion, frame_snap, frame_end) |> 
   pivot_longer(starts_with("frame_"), 
                values_to = "frameId", 
                names_to = "frame_event",
@@ -85,8 +84,8 @@ plays_locations <- plays_motion |>
          x_change_snap = abs(x_snap - x_center_before_snap),
          y_change_snap = abs(y_snap - y_center_before_snap))
 
-# plays_locations |> 
-#   select(y_passer_motion, y_passer_line_set, y_passer_snap) |> 
+# plays_locations |>
+#   select(y_passer_motion, y_passer_line_set, y_passer_snap) |>
 #   pairs()
 
 # perform clustering with a Gaussian mixture model
@@ -94,7 +93,7 @@ library(mclust)
 set.seed(5)
 motion_mclust <- plays_locations |> 
   select(contains("_change_")) |> 
-  Mclust(G = 3:12)
+  Mclust(G = 3:15)
 
 motion_mclust |> 
   summary()
