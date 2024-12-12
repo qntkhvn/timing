@@ -43,7 +43,7 @@ posteriors_slab <- snap_timing_fit |>
        y = NULL,
        color = "Credible Interval",
        title = "Posterior distributions of QB shape random effect",
-       subtitle = "For plays with players in motion at snap & running a route\nand QBs with at least 50 snaps played") +
+       subtitle = "For plays with receivers in motion at snap & running a route\nand QBs with at least 50 pass attempts over these plays") +
   theme_minimal(base_family = "Fira Sans") +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_line(color = "gray95"),

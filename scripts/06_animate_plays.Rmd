@@ -444,6 +444,7 @@ ggplot() +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5, size = 16),
         plot.subtitle = element_text(size = 9.5, face = "italic", hjust = 0.5),
+        plot.background = element_rect(fill = "white", color = NA),
         text = element_text(family = "Fira Sans", color = "#26282A"),
         panel.grid = element_blank(),
         legend.position = "top",
@@ -452,6 +453,13 @@ ggplot() +
         axis.text = element_blank(),
         axis.title = element_blank(),
         axis.ticks = element_blank())
+
+# ggsave(
+#   "figures/clustering_features.png",
+#   width = 5.6,
+#   height = 3.6,
+#   dpi = 1200
+# )
 ```
 
 

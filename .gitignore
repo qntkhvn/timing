@@ -1,5 +1,6 @@
 # Local files
 data/
+demo/
 
 # Derivative files
 **/*.DS_Store
