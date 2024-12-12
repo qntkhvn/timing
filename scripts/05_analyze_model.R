@@ -122,6 +122,40 @@ corr_havoc <- plays_havoc_rate_motion |>
 # success rate
 # time to throw
 
+# havoc rate vs motion rate
+
+plays_motion_rate_overall <- player_play_offense |> 
+  group_by(gameId, playId) |> 
+  summarize(motion = sum(motionSinceLineset) > 0) |> 
+  left_join(select(play_context, gameId, playId, posteam, passer_player_id, passer_player_name, play_type)) |> 
+  filter(play_type == "pass") |> 
+  group_by(passer_player_id, passer_player_name) |> 
+  summarize(motion_since_line_set_rate_overall = mean(motion)) |> 
+  ungroup()
+
+plays_motion_rate_overall |> 
+  full_join(plays_havoc_rate_overall) |> 
+  filter(passer_player_id %in% qb_filtered$passer_player_id) |> 
+  # summarize(cor(motion_since_line_set_rate_overall, havoc_rate_overall))
+  ggplot(aes(motion_since_line_set_rate_overall, havoc_rate_overall)) +
+  geom_smooth(method = lm, se = FALSE,
+              color = "gray",
+              linetype = "dashed") +
+  geom_point(size = 3) +
+  ggrepel::geom_text_repel(aes(label = passer_player_name))
+
+# shape rand eff posterior mean vs motion rate
+
+plays_motion_rate_overall |> 
+  inner_join(qb_shape_posterior) |> 
+  # summarize(cor(motion_since_line_set_rate_overall, posterior_mean_shape))
+  ggplot(aes(posterior_mean_shape, motion_since_line_set_rate_overall)) +
+  geom_smooth(method = lm, se = FALSE,
+              color = "gray",
+              linetype = "dashed") +
+  geom_point(size = 3) +
+  ggrepel::geom_text_repel(aes(label = passer_player_name))
+
 
 # look at the mean parameter
 
@@ -148,7 +182,7 @@ qb_mean_posterior |>
 receiver_filtered <- plays_snap_timing |> 
   distinct(gameId, playId, nflId) |> 
   count(nflId) |> 
-  filter(n > 15)
+  filter(n >= 15)
 
 receiver_posterior <- snap_timing_fit |> 
   spread_draws(r_nflId[nflId, term]) |> 

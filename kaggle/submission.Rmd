@@ -109,7 +109,7 @@ This information, however, is not provided in the data, prompting us to consider
 
 Our clustering input contains tracking data features describing the motion player's location at different events relative to where the ball-snapper lines up before the snap.
 The following figure illustrates the derived features for the example play from earlier with Travis Kelce in motion.
-We compute the displacement at ball-snap between the motion player and snapper in both sideline $(\textsf{S}_{\textsf{sideline}})$ and endzone $(\textsf{S}_{\textsf{endzone}})$ directions.
+We compute the displacement between the snapper and motion player at ball-snap in both sideline $(\textsf{S}_{\textsf{sideline}})$ and endzone $(\textsf{S}_{\textsf{endzone}})$ directions.
 We also include the displacement with respect to the sideline between the snapper and motion player at the start of motion $(\textsf{M}_{\textsf{sideline}})$ as well as when they cross the line of scrimmage (LOS) $(\textsf{L}_{\textsf{sideline}})$.
 
 <center>
@@ -158,6 +158,8 @@ The figure below is a scatterplot of the aforementioned posterior mean and havoc
 **We observe that lower snap timing variability corresponds to higher rate of facing havoc events created by the opposing defense.**
 This makes intuitive sense, as when there is little variability in timing, the offense is likely to be predictable and experience unfavorable play outcomes.
 In contrast, by varying the duration between motion and snap, offenses can create uncertainty, forcing defenders to play more cautiously which reduces their effectiveness in executing disruptive plays.
+
+[[TODO: comment on the correlation between motion rate vs havoc rate & shape rand eff posterior mean vs motion rate]]
 
 ```{r}
 #| fig-height: 4.1
