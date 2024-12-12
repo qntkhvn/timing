@@ -21,8 +21,8 @@ knitr::opts_chunk$set(
 # Introduction
 
 Consider the following two pass attempts by Kansas City Chiefs quarterback Patrick Mahomes in the 2022 NFL regular season.
-The first play (left) is a 9-yard pass to WR Marquez Valdes-Scantling for a first down against the Colts in week 3.
-The second play (right) is a 45-yard TD pass to WR JuJu Smith-Schuster against the 49ers in week 7.
+The first play (left) is a 9-yard pass to Marquez Valdes-Scantling for a first down against the Colts in week 3.
+The second play (right) is a 45-yard TD pass to JuJu Smith-Schuster against the 49ers in week 7.
 In both plays, KC (in white) uses the same type of motion---glide, as the motion players (in gold) initially line up in an outside wide alignment before moving laterally toward the inside.
 
 :::: {style="display: flex;"}
@@ -51,7 +51,7 @@ In this work, **we propose a multilevel modeling framework to assess a passer's 
 # Defining snap timing
 
 We define the snap timing $\delta$ for a play as the number of frames elapsed between the start of motion $(t_{\text{motion}})$ and the ball-snap $(t_{\text{snap}})$.
-That is,$$\delta = t_{\text{snap}} - t_{\text{motion}}\,.$$ 
+That is,$$\delta=t_{\text{snap}}-t_{\text{motion}}\,.$$ 
 Note that in our analysis, we only consider **plays with receivers in motion at snap and also running a route**.
 
 Here, it is straightforward to obtain $t_{\text{snap}}$ for each play using the frame label in the tracking data.
@@ -63,7 +63,7 @@ We use the following procedure to determine $t_{\text{motion}}$ for each play.
 
 *   For the remaining plays (specifically, plays where motion player at snap is not the sole player in motion since line-set, and plays with players charted as in motion at snap but without a `man_in_motion` tracking event):
 
-    *   We first observe the distribution for ratio between the speed at the `man_in_motion` event and the maximum speed between line-set and snap (only using plays with $t_{\text{motion}}$ identified earlier). 
+    *   We first observe the distribution for the ratio between the speed of motion player at `man_in_motion` and their maximum speed between line-set and snap (only using plays with $t_{\text{motion}}$ identified earlier). 
 
     *   We then choose the average ratio value of 0.45 as the threshold for determining the start of motion for the remaining plays. Specifically, we assign $t_{\text{motion}}$ as the first frame between line-set and snap where the player reaches at least 45% of their top speed.
     
@@ -78,7 +78,7 @@ The observed timing between motion and snap on a single play is surely attributa
 To this end, we fit the following multilevel model:
 $$
 \begin{aligned}
-\delta_i  &\sim \textsf{Gamma}(\mu_i, \alpha_i) \\
+\delta_i&\sim\textsf{Gamma}(\mu_i, \alpha_i) \\
 \\
 \log \mu_i &= \gamma_0 + \boldsymbol{\beta X_i} + b_{q[i]} + b_{m_[i]} + b_{d[i]} \\
 b_q  &\sim \textsf{Normal}(0, \sigma^2_q)\\
@@ -129,7 +129,7 @@ We choose the optimal number of Gaussian clusters using BIC, and validate the cl
 # Analysis
 
 Our multilevel model is fitted in a Bayesian framework via the `brms` `R` package using 4 parallel chains of 10,000 iterations and 5,000 burn-in draws.
-We perform diagnostics by inspecting trace plots as well as computing the $\widehat R$ and effective sample size statistics, and find no issues with model convergence and efficiency.
+We perform diagnostics by inspecting trace plots as well as computing the $\widehat{R}$ and effective sample size statistics, and find no issues with model convergence and efficiency.
 Ultimately, we obtain posterior distributions for our model parameters and perform the following analysis.
 
 ## Leaderboard
@@ -187,7 +187,7 @@ Since neither of these tasks is the main focus of our work, we leave these explo
 
 All code is available at https://github.com/qntkhvn/timing.
 
-RY thanks Sam Schwartzstein for a conversation which motivated the idea of measuring variability in QB snap timing.
+RY thanks Sam Schwartzstein for a conversation which motivated the topic of QB snap timing variability.
 QN thanks Nick Wan whose [Twitch stream](https://www.twitch.tv/nickwan_datasci) and [Kaggle notebook](https://www.kaggle.com/code/nickwan/fly-sweeps-are-the-best-rushing-play) inspired the definition and identification of motion in this work.
 
 On a personal note, QN failed to convince RY to name the metric *STRAIN (Patrick's version)*, where STRAIN stands for Snap Timing Rhythm and Adaptability INdex.
