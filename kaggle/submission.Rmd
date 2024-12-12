@@ -109,7 +109,7 @@ This information, however, is not provided in the data, prompting us to consider
 
 Our clustering input contains tracking data features describing the motion player's location at different events relative to where the ball-snapper lines up before the snap.
 The following figure illustrates the derived features for the example play from earlier with Travis Kelce in motion.
-We compute the displacement between the snapper and motion player at ball-snap in both sideline $(\textsf{S}_{\textsf{sideline}})$ and endzone $(\textsf{S}_{\textsf{endzone}})$ directions.
+We compute the displacement between the snapper and motion player at ball-snap in both sideline $(\textsf{B}_{\textsf{sideline}})$ and endzone $(\textsf{B}_{\textsf{endzone}})$ directions.
 We also include the displacement with respect to the sideline between the snapper and motion player at the start of motion $(\textsf{M}_{\textsf{sideline}})$ as well as when they cross the line of scrimmage (LOS) $(\textsf{L}_{\textsf{sideline}})$.
 
 <center>
@@ -182,6 +182,8 @@ Since neither of these tasks is the main focus of our work, we leave these explo
 [[TODO: mention QB awareness/pocket presence. (should go in first paragraph?)]]
 
 [[TODO: mention selections of QB---no Jalen Hurts/Joe Burrow]]
+
+[[TODO: mention we did not consider running plays]]
 
 # Appendix {-}
 

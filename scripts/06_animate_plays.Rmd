@@ -347,7 +347,7 @@ event1 <- path1 |>
          event = ifelse(frameId == frameId[which(x > x_los)][1], "cross_los", event)) |> 
   filter(event %in% c("man_in_motion", "ball_snap", "cross_los")) |> 
   mutate(pt_size = 8) |> 
-  mutate(txt = c("Start of Motion", "Snap", "Crossing LOS"))
+  mutate(txt = c("Start of Motion", "Ball snap", "Crossing LOS"))
 
 
 library(latex2exp)
@@ -390,7 +390,7 @@ ggplot() +
   geom_point(data = mutate(filter(football1, event == "man_in_motion"), pt_size = 3), 
              aes(y, x, size = pt_size, group = nflId), fill = "#654321", shape = 21) +
   ggrepel::geom_text_repel(data = event1, aes(y, x, label = txt), 
-                           nudge_x = c(0, 1, 3), nudge_y = c(1, 0.9, 0.5), segment.color = NA,
+                           nudge_x = c(0, 1.5, 2.9), nudge_y = c(1, 0.9, 0.4), segment.color = NA,
                            family = "Fira Sans", fontface = "bold") +
   annotate("segment", 
            y = 23.2,
@@ -427,9 +427,9 @@ ggplot() +
   annotate("text", x = 15.5, y = 22.7, color = "white", family = "Fira Sans", size = 4.5,
            label = TeX("$\\textbf{M_{sideline}}$")) +
   annotate("text", x = 21.3, y = 24, color = "white", family = "Fira Sans", size = 4.5,
-           label = TeX("$\\textbf{S_{sideline}}$")) +
+           label = TeX("$\\textbf{B_{sideline}}$")) +
   annotate("text", x = 26.5, y = 25.5, color = "white", family = "Fira Sans", size = 4.5,
-           label = TeX("$\\textbf{S_{endzone}}$")) +
+           label = TeX("$\\textbf{B_{endzone}}$")) +
   annotate("text", x = 21.3, y = 28.5, color = "white", family = "Fira Sans", size = 4.5,
            label = TeX("$\\textbf{L_{sideline}}$")) +
   scale_fill_manual(values = c("white", "gold"),
