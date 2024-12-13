@@ -38,6 +38,9 @@ snap_timing_fit <- brm(
 
 # model diagnostics
 snap_timing_fit |> 
+  plot()
+
+snap_timing_fit |> 
   brms::rhat() |> 
   summary()
 

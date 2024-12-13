@@ -93,7 +93,7 @@ library(mclust)
 set.seed(5)
 motion_mclust <- plays_locations |> 
   select(contains("_change_")) |> 
-  Mclust(G = 3:6)
+  Mclust(G = 2:6)
 
 motion_mclust |> 
   summary()
