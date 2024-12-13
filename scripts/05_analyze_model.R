@@ -89,13 +89,13 @@ corr_havoc <- plays_havoc_rate_motion |>
   mutate(
     passer_player_name = str_replace(passer_player_name, "\\.", "\\. "),
     play_subset = ifelse(play_subset == "motion", 
-                         "Considered motion plays (r = –0.33)", "All pass plays (r = –0.48)")
+                         "Considered motion plays (r = –0.40)", "All pass plays (r = –0.52)")
   ) |> 
   # group_by(play_subset) |> summarize(cor(posterior_mean_shape, havoc_rate))
   ggplot(aes(posterior_mean_shape, havoc_rate)) +
   geom_smooth(method = lm, se = FALSE,
               color = "gray",
-              xseq = c(-0.49, 0.32),
+              xseq = c(-0.41, 0.33),
               linetype = "dashed") +
   geom_point(alpha = 0.6, size = 3.5, aes(color = I(team_color))) +
   ggrepel::geom_text_repel(aes(label = passer_player_name), 

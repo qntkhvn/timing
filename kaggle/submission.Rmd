@@ -88,7 +88,7 @@ u_q  &\sim \textsf{Normal}(0, \tau^2_q)\\
 $$
 In detail, we model the response $\delta_i > 0$ (snap timing for play $i$) using a Gamma distribution (with log link function,
 [parameterized by mean $\mu$ and shape $\alpha$](https://paulbuerkner.com/brms/articles/brms_families.html#:~:text=The%20density%20of%20the%20Gamma,shape%20parameter)),
-which is well-suited for modeling a positive, continuous ("waiting time") variable like our case.
+which is well-suited for modeling a positive, continuous ("interarrival time") variable like our case.
 
 Of primary interest, we model the shape $\alpha$ (which is proportional to the Gamma distribution's variance) with QB random effects.
 This allows us to examine the variability in timing between motion and snap among NFL quarterbacks.
@@ -118,7 +118,7 @@ Note that for plays where the motion player never crosses the LOS, we instead us
 The aforementioned 3-second threshold is chosen using the observed distribution of the time elapsed from snap to crossing LOS for plays where motion players do cross the LOS, as it captures a sufficiently large fraction (~95%) of the values.
 
 We fit a Gaussian mixture model via the `mclust` `R` package to obtain unsupervised labels for the pre-snap motions.
-We select the optimal number of Gaussian clusters to be $G=10$ using BIC, and validate the cluster assignment through visual inspection of player motion trajectories in each cluster.
+We select the optimal number of Gaussian clusters to be $G=6$ using BIC, and validate the cluster assignment through visual inspection of player motion trajectories in each cluster.
 Ultimately, we condition on these cluster labels as fixed effects in modeling the mean snap timing $\mu$, so that our estimates of QB snap timing variability $u_q$ (at the shape-level) are not confounded by different types of motion.
 
 # Analysis
@@ -162,7 +162,7 @@ In contrast, by varying the duration between motion and snap, offenses can creat
 readRDS("../figures/corr_havoc.rds")
 ```
 
-As a side note, the posterior mean for the shape random effect scarcely correlates with the rate of motion on all passing plays $(r = 0.08)$ over the first nine weeks of the 2022 season.
+As a side note, the posterior mean for the shape random effect scarcely correlates with the rate of motion on all passing plays $(r = 0.11)$ over the first nine weeks of the 2022 season.
 Additionally, there is a weak correlation between motion rate and havoc rate $(r = -0.09)$.
 This suggests that **our measure of QB snap timing variability provides independent information of motion tendency, while also being a more direct indicator of encountering defensive disruptions than the prevalence of motion**.
 

@@ -93,7 +93,7 @@ library(mclust)
 set.seed(5)
 motion_mclust <- plays_locations |> 
   select(contains("_change_")) |> 
-  Mclust(G = 3:15)
+  Mclust(G = 3:6)
 
 motion_mclust |> 
   summary()
@@ -109,7 +109,6 @@ plays_motion_clusters <- plays_locations |>
   mutate(cluster = motion_mclust$classification)
 
 # plot player trajectories for each cluster
-# 1 exit 2 over 3 wider exit? 4 orbit 5 glide 6 fly/jet 7 in
 plays_motion_clusters |> 
   mutate(curve_id = row_number()) |> 
   select(gameId, playId, nflId, frameId_motion, frameId_end, cluster, curve_id) |> 
