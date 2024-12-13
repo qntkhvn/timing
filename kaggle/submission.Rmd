@@ -140,11 +140,15 @@ Note that there is considerable uncertainty in our estimates, as demonstrated by
 Still, we observe substantial differences in the CIs across this subset of QBs.
 For instance, the 95% CI for Daniel Jones (who ranks last in our leaderboard) does not overlap with the top five quarterbacks' 95% CIs.
 
-```{r}
-#| fig-height: 8
-#| fig-width: 6
-readRDS("../figures/posteriors_slab.rds")
-```
+<!-- ```{r posteriors_slab, fig.path="../figures/"} -->
+<!-- #| fig-height: 8 -->
+<!-- #| fig-width: 6 -->
+<!-- readRDS("../figures/posteriors_slab.rds") -->
+<!-- ``` -->
+
+<center>
+<img src="../figures/posteriors_slab.png" style="width:65%">
+</center>
 
 ## Comparison to havoc rate
 
@@ -156,11 +160,15 @@ The figure below is a scatterplot of the posterior mean for the shape random eff
 This makes intuitive sense, as when there is little variability in timing, the offense is likely to be predictable and experience unfavorable play outcomes.
 In contrast, by varying the duration between motion and snap, offenses can create uncertainty, forcing defenders to play more cautiously which reduces their effectiveness in executing disruptive plays.
 
-```{r}
-#| fig-height: 4.1
-#| fig-width: 10
-readRDS("../figures/corr_havoc.rds")
-```
+<!-- ```{r corr_havoc, fig.path="../figures/"} -->
+<!-- #| fig-height: 4.1 -->
+<!-- #| fig-width: 10 -->
+<!-- readRDS("../figures/corr_havoc.rds") -->
+<!-- ``` -->
+
+<center>
+<img src="../figures/corr_havoc.png" style="width:99%">
+</center>
 
 As a side note, the posterior mean for the shape random effect scarcely correlates with the rate of motion on all passing plays $(r = 0.11)$ over the first nine weeks of the 2022 season.
 Additionally, there is a weak correlation between motion rate and havoc rate $(r = -0.09)$.
