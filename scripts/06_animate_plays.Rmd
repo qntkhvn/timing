@@ -433,7 +433,7 @@ ggplot() +
   annotate("text", x = 21.3, y = 28.5, color = "white", family = "Fira Sans", size = 4.5,
            label = TeX("$\\textbf{L_{sideline}}$")) +
   scale_fill_manual(values = c("white", "gold"),
-                    labels = c("Snapper (C. Humphrey)", "Motion (T. Kelce)")) +
+                    labels = c("Center (C. Humphrey)", "Motion (T. Kelce)")) +
   scale_size_identity() +
   scale_color_identity() +
   scale_linetype_identity() +

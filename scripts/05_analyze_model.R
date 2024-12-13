@@ -118,6 +118,9 @@ corr_havoc <- plays_havoc_rate_motion |>
 
 # write_rds(corr_havoc, "figures/corr_havoc.rds", compress = "gz")
 
+
+# supplements -------------------------------------------------------------
+
 # yards per attempt
 # success rate
 # time to throw
@@ -127,7 +130,8 @@ corr_havoc <- plays_havoc_rate_motion |>
 plays_motion_rate_overall <- player_play_offense |> 
   group_by(gameId, playId) |> 
   summarize(motion = sum(motionSinceLineset) > 0) |> 
-  left_join(select(play_context, gameId, playId, posteam, passer_player_id, passer_player_name, play_type)) |> 
+  left_join(select(play_context, gameId, playId, posteam, 
+                   passer_player_id, passer_player_name, play_type)) |> 
   filter(play_type == "pass") |> 
   group_by(passer_player_id, passer_player_name) |> 
   summarize(motion_since_line_set_rate_overall = mean(motion)) |> 
@@ -158,7 +162,6 @@ plays_motion_rate_overall |>
 
 
 # look at the mean parameter
-
 qb_mean_posterior <- snap_timing_fit |> 
   spread_draws(r_passer_player_id[passer_player_id, term]) |>
   left_join(distinct(play_context, passer_player_name, passer_player_id)) |> 
@@ -178,7 +181,6 @@ qb_mean_posterior |>
 
 
 # look at receivers
-
 receiver_filtered <- plays_snap_timing |> 
   distinct(gameId, playId, nflId) |> 
   count(nflId) |> 
@@ -193,7 +195,6 @@ receiver_posterior <- snap_timing_fit |>
   ungroup() |> 
   arrange(posterior_mean)
 
-
 snap_timing_fit |> 
   spread_draws(r_nflId[nflId, term]) |> 
   left_join(players) |> 
@@ -201,14 +202,9 @@ snap_timing_fit |>
   mutate(displayName = factor(displayName, receiver_posterior$displayName)) |> 
   ggplot(aes(x = r_nflId, y = displayName, fill = position)) +
   ggridges::geom_density_ridges(rel_min_height = 0.05, alpha = 0.5) +
-  # scale_fill_manual(values = c("gray", "darkblue", "darkred", "darkorange")) +
   scale_fill_manual(values = c("gold", "red", "purple", "gray")) +
-  # stat_interval(alpha = 0.8) +
-  # stat_summary(geom = "point", fun = mean, size = 0.8) +
-  # scale_color_manual(values = MetBrewer::met.brewer("VanGogh3"),
-  #                    labels = c("95%", "80%", "50%")) +
-  labs(x = "player random effect",
+  labs(x = "Player random effect",
        y = NULL,
-       subtitle = "Players with more than 15 motions") +
+       subtitle = "Players with min. 15 motions") +
   theme_minimal()
 

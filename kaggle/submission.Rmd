@@ -1,5 +1,5 @@
 ---
-title: Down, set, hut! Explaining variability in snap cadence on plays with motion
+title: Down, set, hut! Explaining variability in snap timing on plays with motion
 output: 
   html_document: 
     math_method: katex
@@ -41,7 +41,7 @@ In both plays, KC (in white) uses the same type of motion---glide, as the motion
 ::::
 
 In each animation, the solid gold line along the motion player's path (dashed gray line) represents the trajectory portion between the start of motion and the ball-snap.
-It is apparent that the plays differ in the time duration of this color-coded portion of the path.
+It is apparent that the plays differ in the duration of this color-coded portion of the path.
 In the first play, the snap happens 3.6 seconds after Travis Kelce begins his motion, whereas in the second, less than a second elapses since Mecole Hardman starts motioning.
 As both plays result in significant gains (a first down and touchdown), this highlights Mahomes' ability to react, anticipate, and time the snaps in various situations, elevating the effectiveness of the entire KC offensive unit.
 
@@ -66,9 +66,6 @@ We use the following procedure to determine $t_{\text{motion}}$ for each play.
     *   We first observe the distribution for the ratio between the speed of motion player at `man_in_motion` and their maximum speed between line-set and snap (only using plays with $t_{\text{motion}}$ identified earlier). 
 
     *   We then choose the average ratio value of 0.45 as the threshold for determining the start of motion for the remaining plays. Specifically, we assign $t_{\text{motion}}$ as the first frame between line-set and snap where the player reaches at least 45% of their top speed.
-    
-<!-- limitation of this is discussed in Discussion section -->
-
 
 # Multilevel model for snap timing
 
@@ -91,17 +88,18 @@ u_q  &\sim \textsf{Normal}(0, \tau^2_q)\\
 $$
 In detail, we model the response $\delta_i > 0$ (snap timing for play $i$) using a Gamma distribution (with log link function,
 [parameterized by mean $\mu$ and shape $\alpha$](https://paulbuerkner.com/brms/articles/brms_families.html#:~:text=The%20density%20of%20the%20Gamma,shape%20parameter)),
-which is well-suited for modeling a positive, "waiting time" variable like our case.
+which is well-suited for modeling a positive, continuous ("waiting time") variable like our case.
 
-Of primary interest, we model the shape $\alpha$ of the distribution with QB random effects (which is proportional to the Gamma distribution variance).
+Of primary interest, we model the shape $\alpha$ (which is proportional to the Gamma distribution's variance) with QB random effects.
 This allows us to examine the variability in timing between motion and snap among NFL quarterbacks.
 From an offensive standpoint, we hypothesize that a higher timing variability is beneficial because it prevents defenses from predicting when the snap will occur.
 This may allow the offense to control the game flow and exploit defensive vulnerabilities.
 
 We also model the mean parameter $\mu$ by including random intercepts for three groups: quarterback $q$, motion player $m$, and defensive team $d$.
 Moreover, we account for contextual and personnel information about play $i$ through $\boldsymbol{X_i}$, and estimate the coefficients $\boldsymbol\beta$ as fixed effects.
-These include the current down, number of timeouts remaining for the offense, play clock at the start of motion, motion player's position (WR, TE, RB/FB), number of players in motion since line-set, and type of motion, as they all can impact the timing between motion and snap.
-The type of motion is a vital feature for modeling snap timing, since it relates to play design.
+These include the current down, number of timeouts remaining for the offense, play clock at the start of motion, motion player's position, number of players in motion since line-set, and type of motion, as they all can impact the timing between motion and snap.
+
+It is noteworthy that the motion type is a vital feature for modeling snap timing, since it relates to play design.
 For instance, in a play-action pass, a team can fake a jet sweep to set up the QB for a pass.
 However, this information is not provided in the data, prompting us to consider a clustering algorithm to identify the different types of motion.
 
@@ -116,23 +114,20 @@ We also include the displacement with respect to the sideline between the center
 <img src="../figures/clustering_features.png" style="width:50%">
 </center>
 
-Note that for plays where the motion player never crosses the LOS, we instead use their location at either the QB event (e.g., forward pass, sack, fumble) or 3 seconds after the snap (depending on which happens sooner) in place of $\textsf{L}_{\textsf{sideline}}$.
+Note that for plays where the motion player never crosses the LOS, we instead use their location at either the QB event (e.g., forward pass, sack) or 3 seconds after the snap (depending on which happens sooner) in place of $\textsf{L}_{\textsf{sideline}}$.
 The aforementioned 3-second threshold is chosen using the observed distribution of the time elapsed from snap to crossing LOS for plays where motion players do cross the LOS, as it captures a sufficiently large fraction (~95%) of the values.
 
-<!-- I prefer "snapper" to "center" here -->
-
 We fit a Gaussian mixture model via the `mclust` `R` package to obtain unsupervised labels for the pre-snap motions.
-We choose the optimal number of Gaussian clusters to be X based on BIC, and validate the cluster assignment through visual inspection of player motion trajectories in each cluster. We condition on these X cluster labels as fixed effects in modeling the mean snap timing parameter $\mu$, so that that our estimates of QB snap timing variability $u_q$ are not confounded by different types of motion.
-
-[[TODO: insert the number of clusters in the paragraph above as X]]
-
-<!-- limitation of this is discussed in Discussion section -->
+We select the optimal number of Gaussian clusters to be $G=10$ using BIC, and validate the cluster assignment through visual inspection of player motion trajectories in each cluster.
+Ultimately, we condition on these cluster labels as fixed effects in modeling the mean snap timing $\mu$, so that our estimates of QB snap timing variability $u_q$ (at the shape-level) are not confounded by different types of motion.
 
 # Analysis
 
 Our multilevel model is fit in a Bayesian framework via the `brms` `R` package using four parallel chains of 10,000 iterations and 5,000 burn-in draws.
 We perform diagnostics by inspecting trace plots as well as computing the $\widehat{R}$ and effective sample size statistics, and find no issues with model convergence and efficiency.
-We quantify uncertainty for our model parameters with posterior distributions. Ultimately, among the considered random effects, the largest source variation is between QBs when modeling the snap timing shape (captured by $\tau_q^2$). Thus, we focus on the QB shape random effects $u_q$ for the following analysis.
+We quantify uncertainty for our model parameters with posterior distributions.
+As it turns out, among the considered random effects, the largest source variation is between QBs when modeling the snap timing shape (captured by $\tau_q^2$).
+Thus, we focus on the QB shape random effects $u_q$ in the following analysis.
 
 ## Leaderboard
 
@@ -140,10 +135,10 @@ The following figure displays the posterior distributions for the shape random e
 For each player, the posterior mean provides an estimate for their ability to maintain variability in snap timing, **with higher posterior mean values corresponding to greater variability in timing between the start of motion and snap**.
 
 Patrick Mahomes stands out as the top QB according our measure, adding the ability to time snaps as another element to his success.
-Other high-caliber QBs such as Tom Brady and Josh Allen are also among the top players in our rankings.
-Note that there is considerable uncertainty in our estimates, as demonstrated by the rather wide credible intervals (CI), which is unsurprising given our limited sample of motion plays.
+Other high-caliber QBs such as Tom Brady and Josh Allen are also among the leaders in our rankings.
+Note that there is considerable uncertainty in our estimates, as demonstrated by the rather wide credible intervals (CIs), which is unsurprising given our limited sample of motion plays.
 Still, we observe substantial differences in the credible intervals across this subset of QBs.
-For instance, despite his pay, Daniel Jones' 95% CI does not overlap at all with the 95% CIs of the top five QBs.
+For instance, despite his pay, Daniel Jones' 95% CI does not overlap at all with the top five quarterbacks' 95% CIs.
 
 ```{r}
 #| fig-height: 8
@@ -153,9 +148,9 @@ readRDS("../figures/posteriors_slab.rds")
 
 ## Comparison to havoc rate
 
-Next, we examine the relationship between the posterior mean for the QB shape random effect $u_q$ and a measure of "havoc rate".
+We now examine the relationship between the posterior mean for the QB shape random effect $u_q$ and a measure of "havoc rate".
 Here, a havoc event is defined as whether any of the following defensive outcomes are generated on a play: pass breakup, forced fumble, tackle for loss, interception, sack, and pressure.
-The figure below is a scatterplot of the QB shape random effect and havoc rate for all pass plays over the first nine weeks of the 2022 NFL season (left) and only the considered motion plays (right) for the same subset of QBs as before.
+The figure below is a scatterplot of the posterior mean for the shape random effect and havoc rate across all passing plays over the first nine weeks of the 2022 NFL season (left) and only the considered motion plays (right) for the same subset of QBs as before.
 
 **We observe that lower snap timing variability corresponds to higher rate of facing havoc events created by the opposing defense.**
 This makes intuitive sense, as when there is little variability in timing, the offense is likely to be predictable and experience unfavorable play outcomes.
@@ -167,21 +162,27 @@ In contrast, by varying the duration between motion and snap, offenses can creat
 readRDS("../figures/corr_havoc.rds")
 ```
 
-As a side note, the posterior mean for the shape random effect scarcely correlates with the rate of motion on all pass plays ($r = 0.08$).
-Additionally, there is a weak correlation between motion rate and havoc rate ($r = -0.09$).
+As a side note, the posterior mean for the shape random effect scarcely correlates with the rate of motion on all passing plays $(r = 0.08)$ over the first nine weeks of the 2022 season.
+Additionally, there is a weak correlation between motion rate and havoc rate $(r = -0.09)$.
 This suggests that **our measure of QB snap timing variability provides independent information of motion tendency, while also being a more direct indicator of encountering defensive disruptions than the prevalence of motion**.
 
 # Discussion
 
 Variability in snap timing is an essential aspect for an offense to dictate plays and make it difficult for defenses to anticipate and react.
 Through multilevel modeling, we provide an assessment of a quarterback's ability to maintain variable snap timing with their teammates' motion.
-We demonstrate that higher variability in snap timing is beneficial for the passing game, as it relates to experiencing less disruptions generated by the defense. Although we solely focused on snap timing for passing plays with motion, we believe our estimates may also serve as proxies of QB awareness or pocket presence as indicated by the moderate correlation with havoc rate across all passing plays (not just the plays considered in our modeling framework).
+We demonstrate that higher variability in snap timing is beneficial for the passing game, as it relates to experiencing less disruptions generated by the defense.
+Although we solely focus on snap timing for passing plays with motion, we believe our estimates may also serve as proxies for QB awareness or pocket presence, as indicated by the moderate correlation with havoc rate across all passing plays (not just the plays considered in our model).
 
 Our proposed framework is not without limitations.
 First, to identify the start of motion, we use a threshold-based criterion which relies on the moment at which the motion player achieves a certain fraction of their top speed prior to the snap.
-This is certainly a simple viewpoint, as one could come up with a more rigid definition by building a model to predict the starting motion frame.
+This is certainly a simple viewpoint, as one could come up with a more robust definition by building a model to predict the starting motion frame.
 Further, despite the reasonable set of inputs in our cluster analysis, there is possibly room for improvement in identifying the motion types by having more refined features, or alternatively using a functional clustering approach.
-Since neither of these tasks is the main focus of our work, we leave these explorations for the future. Additionally, we limited our analysis to only passing plays with receivers in motion at snap. This introduces a selection bias into our study by excluding running plays and various QBs (e.g., Jalen Hurts and Joe Burrow). We also recognize that while we refer to our estimates as "QB random effects", they are certainly correlated with the team's center and coach's play calling. Nevertheless, __we believe our contribution is a novel description of snap timing variability and reveals insight into an understudied area of football.__
+Since neither of these tasks is the main focus of our work, we leave these explorations for the future.
+
+Additionally, our study is limited to only passing plays with receivers in motion at snap.
+This introduces a selection bias into our analysis by excluding running plays and various QBs who do not meet the cutoff for minimum pass attempts on motion plays (e.g., Jalen Hurts and Joe Burrow).
+We also recognize that while we refer to our estimates as "QB random effects", they are certainly correlated with the team's center and coach's play-calling.
+Nevertheless, **we believe our contribution is a novel description of snap timing variability and reveals insight into an understudied area of football.**
 
 
 # Appendix {-}
