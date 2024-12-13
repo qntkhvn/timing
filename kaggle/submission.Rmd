@@ -138,7 +138,7 @@ Patrick Mahomes stands out as the top QB according our measure, adding the abili
 Other high-caliber QBs such as Tom Brady and Josh Allen are also among the leaders in our rankings.
 Note that there is considerable uncertainty in our estimates, as demonstrated by the rather wide credible intervals (CIs), which is unsurprising given our limited sample of motion plays.
 Still, we observe substantial differences in the credible intervals across this subset of QBs.
-For instance, despite his pay, Daniel Jones' 95% CI does not overlap at all with the top five quarterbacks' 95% CIs.
+For instance, the 95% CI for Daniel Jones (who ranks last in our leaderboard) does not overlap with the top five quarterbacks' 95% CIs.
 
 ```{r}
 #| fig-height: 8
