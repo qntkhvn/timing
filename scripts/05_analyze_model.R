@@ -101,7 +101,7 @@ corr_havoc <- plays_havoc_rate_motion |>
   ggrepel::geom_text_repel(aes(label = passer_player_name), 
                            family = "Fira Sans", size = rel(3.2), seed = 31) +
   facet_wrap(~ play_subset) +
-  labs(x = "Posterior mean for QB shape random effect",
+  labs(x = "Posterior mean for QB shape random effect\n",
        y = "Havoc rate") +
   theme_light() +
   annotate("segment", x = 0.115, y = 0.528, xend = 0.33, yend = 0.528, linewidth = 0.7,
