@@ -164,7 +164,7 @@ We use the following procedure to determine $t_i^{\text{motion}}$ for each play.
 
 For context, Figure \ref{fig:fig_timing_distribution} displays the snap timing distribution for plays with receivers in motion at snap and running a route.
 We observe a right skewed distribution, as about 95% of the snap timing values are within 50 frames (or 5 seconds), with a median of 17 frames (i.e., 1.7 seconds between the start of motion and ball snap).
-This indicates that the snap timing appears to be relatively short across the considered motion plays.
+It appears that the snap timing is relatively short across the considered motion plays.
 
 ```{r}
 #| label: fig_timing_distribution
@@ -187,7 +187,7 @@ plays_snap_timing |>
 
 ## Multilevel model for snap timing
 
-The observed timing between motion and snap on a play is likely attributable to numerous variables---from contextual and spatiotemporal features, to the players and teams involved.
+The observed timing between motion and snap on a play is likely attributable to numerous variables, from the play-level context to the players and teams involved.
 Apart from the quarterback and receiver on offense, there is variability in the opposing team on defense.
 Thus, it is necessary to decompose the variability in snap timing into factors related to the individual player and team on any given play.
 To this end, we fit the following multilevel model:
