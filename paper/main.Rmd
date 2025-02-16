@@ -162,8 +162,9 @@ We use the following procedure to determine $t_i^{\text{motion}}$ for each play.
     
 [^inconsistency]: See https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709.
 
-For context, Figure \ref{fig:fig_timing_distribution} displays the distribution for the snap timing across the considered plays.
+For context, Figure \ref{fig:fig_timing_distribution} displays the snap timing distribution for plays with receivers in motion at snap and running a route.
 We observe a right skewed distribution, as about 95% of the snap timing values are within 50 frames (or 5 seconds), with a median of 17 frames (i.e., 1.7 seconds between the start of motion and ball snap).
+This indicates that the snap timing appears to be relatively short across the considered motion plays.
 
 ```{r}
 #| label: fig_timing_distribution
@@ -263,8 +264,8 @@ We further validate our results through visual inspection of motion trajectories
 Figure \ref{fig:fig_motion_clusters} displays sample paths of motion players in each of the 6 cluster from the starting point of motion (in red) to the ball snap (in blue).
 We see clear structural differences in the player paths between the cluster assignments, which can then be interpreted to add more football context to the results.
 For instance, cluster 2 represents the orbit motion, as the motion happens behind the quarterback with the motion player moving laterally until the snap; cluster 3 illustrates the jet motion, where the motion player runs laterally across the formation; cluster 4 depicts the glide motion, with the motion player initially lining up in an outside wide alignment before moving laterally toward the inside; and so on.
-Ultimately, we condition on these cluster labels as fixed effects in modeling the mean snap timing $\mu$, so that our estimates of QB snap timing variability $u_q$ (at the shape level) are not confounded by different types of motion.
 We emphasize that our motion identification approach is only a starting point, and future improvements regarding feature engineering and unsupervised learning algorithm may produce more reasonable clustering results.
+Ultimately, we condition on these cluster labels as fixed effects in modeling the mean snap timing $\mu$, so that our estimates of QB snap timing variability $u_q$ (at the shape level) are not confounded by different types of motion.
 
 <!-- To add more context, we interpret our cluster assignments as follows. -->
 
@@ -306,7 +307,7 @@ We perform diagnostics by inspecting trace plots as well as computing the $\wide
 ## Model summary
 
 We now examine the estimates of the fixed effects coefficients and variance parameters of our model.
-Table \ref{tab:fixedeff} summarizes the results for the fixed effects terms of our multilevel model at the mean parameter level.
+Table \ref{tab:fixedeff} summarizes the results for the fixed effects terms of the mean snap timing model in our multilevel framework.
 We notice several interesting results regarding the contextual and personnel covariates.
 Relative to first down plays, the timing between the start of motion by a receiver and the ball snap appears to take longer on second and third downs.
 This could be due to more complex offensive play calls on later downs, or the defense's tendency to disguise their coverages more on crucial downs, requiring the quarterback to make last-second reads and adjustments.
@@ -347,7 +348,7 @@ $I_{\text{\{motion:6\}}}$ & $0.154$ & $0.064$ & $0.029$ & $0.281$ \\
 
 
 Next, Table \ref{tab:randeff} presents posterior estimates for the standard deviation of the random effect terms in our multilevel model.
-As it turns out, among the considered random effects, the largest source variation is between quarterbacks when modeling the snap timing shape, as captured by $\hat \tau_q = 0.297$.
+As it turns out, among the considered random effects, the largest source variation is between quarterbacks when modeling the snap timing shape $\alpha$, as captured by $\hat \tau_q = 0.297$.
 **TODO: what else should be written here.**
 This leads us to focus on the QB shape random effects $u_q$ in the following analysis.
 
