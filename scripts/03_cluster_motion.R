@@ -10,6 +10,11 @@ plays_cross_los <- tracking_players_motion_at_snap |>
   summarize(frame_cross_los = frameId[which(x > x_los)][1]) |> 
   ungroup()
 
+# plays_cross_los |>
+#   drop_na() |> 
+#   inner_join(plays_motion) |>
+#   mutate(frame_snap_to_cross_los = frame_cross_los - frame_snap) |> 
+#   write_rds("data/snap_to_cross_loss.rds")
 
 # distribution for time between snap from snap to moment of crossing the LOS 
 # find a threshold that captures most of the values
@@ -107,6 +112,15 @@ motion_mclust |>
 
 plays_motion_clusters <- plays_locations |> 
   mutate(cluster = motion_mclust$classification)
+
+# plays_motion_clusters |> 
+#   mutate(curve_id = row_number()) |> 
+#   select(gameId, playId, nflId, frameId_motion, frameId_end, cluster, curve_id) |> 
+#   left_join(tracking_players_motion_at_snap) |> 
+#   mutate(frame_color = ifelse(frameId == frameId_motion, "red", NA),
+#          frame_color = ifelse(frameId == frame_snap, "blue", frame_color)) |> 
+#   filter(frameId >= frameId_motion & frameId <= frame_snap) |> 
+#   write_rds("data/tracking_motion_clustering.rds")
 
 # plot player trajectories for each cluster
 plays_motion_clusters |> 

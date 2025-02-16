@@ -10,6 +10,16 @@ plays_use_motion_tag <- tracking_players_motion_at_snap |>
   select(gameId:nflId, frame_line_set, frame_motion = frameId, frame_snap, frame_qb_event) |> 
   filter(frame_motion <= frame_snap)
 
+# plays_use_motion_tag |>
+#   distinct(gameId, playId, nflId, frame_motion) |> 
+#   inner_join(tracking_players_motion_at_snap) |> 
+#   group_by(gameId, playId, nflId) |> 
+#   mutate(max_s = max(s, na.rm = TRUE)) |>
+#   ungroup() |> 
+#   filter(frameId == frame_motion) |> 
+#   mutate(frac_s = s / max_s) |> 
+#   write_rds("data/motion_speed_ratio.rds")
+
 # for these play, observe the distribution of ratio between
 # speed at man_in_motion and max speed
 plays_use_motion_tag |>

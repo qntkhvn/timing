@@ -2,6 +2,12 @@ source("scripts/04_fit_model.R")
 
 # analyze qb shape
 
+# plays_snap_timing |> write_rds("data/plays_snap_timing.rds", compress = "gz")
+# snap_timing_fit |> write_rds("data/snap_timing_fit.rds", compress = "gz")
+
+plays_snap_timing <- read_rds("data/plays_snap_timing.rds")
+snap_timing_fit <- read_rds("data/snap_timing_fit.rds")
+
 qb_filtered <- plays_snap_timing |> 
   distinct(gameId, playId, passer_player_id, passer_player_name) |> 
   count(passer_player_id, passer_player_name) |>
@@ -92,6 +98,7 @@ corr_havoc <- plays_havoc_rate_motion |>
                          "Considered motion plays (r = –0.40)", "All pass plays (r = –0.52)")
   ) |> 
   # group_by(play_subset) |> summarize(cor(posterior_mean_shape, havoc_rate))
+  # group_by(play_subset) |> do(broom::tidy(cor.test(.$posterior_mean_shape, .$havoc_rate, alternative = "less")))
   ggplot(aes(posterior_mean_shape, havoc_rate)) +
   geom_smooth(method = lm, se = FALSE,
               color = "gray",
@@ -101,7 +108,7 @@ corr_havoc <- plays_havoc_rate_motion |>
   ggrepel::geom_text_repel(aes(label = passer_player_name), 
                            family = "Fira Sans", size = rel(3.2), seed = 31) +
   facet_wrap(~ play_subset) +
-  labs(x = "Posterior mean for QB shape random effect\n",
+  labs(x = "Posterior mean for QB shape random effect",
        y = "Havoc rate") +
   theme_light() +
   annotate("segment", x = 0.115, y = 0.528, xend = 0.33, yend = 0.528, linewidth = 0.7,

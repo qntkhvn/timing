@@ -44,6 +44,15 @@ plays <- read_csv("../data/plays.csv")
 
 ## Example play animation
 
+```{r}
+# ex <- tracking |> 
+#   filter(gameId == 2022092502, playId == 1180, nflId == 40011)
+# ex |> 
+#   select(frameId, x:event) |> 
+#   drop_na() |> 
+#   xtable::xtable()
+```
+
 .pull-left[
 
 ```{r}
