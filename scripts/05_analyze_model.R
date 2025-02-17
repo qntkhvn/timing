@@ -191,7 +191,7 @@ qb_mean_posterior |>
 receiver_filtered <- plays_snap_timing |> 
   distinct(gameId, playId, nflId) |> 
   count(nflId) |> 
-  filter(n >= 15)
+  filter(n >= 20)
 
 receiver_posterior <- snap_timing_fit |> 
   spread_draws(r_nflId[nflId, term]) |> 
@@ -212,6 +212,6 @@ snap_timing_fit |>
   scale_fill_manual(values = c("gold", "red", "purple", "gray")) +
   labs(x = "Player random effect",
        y = NULL,
-       subtitle = "Players with min. 15 motions") +
+       subtitle = "Players with min. 20 motions") +
   theme_minimal()
 
