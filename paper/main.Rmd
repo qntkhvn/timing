@@ -95,7 +95,7 @@ This opens up an opportunity to leverage pre-snap information to better understa
 <!-- **[[is this good enough for the motivation of snap timing?]]** -->
 Our analysis focuses on a specific aspect of pre-snap motion: the timing between the moment a receiver begins motioning and the ball snap event.
 We are specifically interested in the variability in snap timing, which means across different plays, the offense does not snap the ball at the same time after a receiver goes in motion.
-This can be considered as a quarterback (QB) skill, since the QB is responsible for controlling the cadence and ensuring the offense operates smoothly in every play.
+This can be considered a quarterback (QB) skill, since the QB is responsible for controlling the cadence and ensuring the offense operates smoothly in every play.
 As such, it is important for the QB to synchronize the snap with motion from their teammates, in order to keep the defense off balance and offense in control.
 We posit that if the snap timing is consistent or predictable, defenders can anticipate the snap count and time their actions to disrupt the play.
 Thus, having variable snap timing may be valuable to the offense, as it makes it harder for the opposing defense to anticipate the snap and time their moves effectively.
@@ -458,6 +458,7 @@ All code related to this paper is available at [`https://github.com/qntkhvn/timi
 # References {-}
 
 ::: {#refs}
+\setlength{\parskip}{0.5\baselineskip}
 :::
 
 \newpage
@@ -557,13 +558,13 @@ read_rds("../data/tracking_motion_clustering.rds") |>
 
 ## Additional multievel model results {#sec:model-supp}
 
-As mentioned in Section \ref{sec:model}, we now investigate the random effects in the mean parameter model for the two groups on offense: quarterbacks and motion players.
+Here, we investigate the random effects in the mean parameter model for the two groups on offense: quarterbacks and motion players, resulting from fitting the multilevel model for snap timing described in Section \ref{sec:model}.
 In Figure \ref{fig:fig_qb_mean_posterior_distributions}, we visualize the posterior distributions for the random effect $b_q$ (sorted by posterior mean) for the same subset of quarterbacks as before (i.e., those attempting at least 50 passes across the considered plays).
 We also display the joint distribution for the posterior mean estimates of the QB mean and shape random effects ($b_q$ and $u_q$, respectively) in Figure \ref{fig:fig_corr_mean_shape}.
 
 As we can see, the scatterplot reveals no inherent relationship between the average and variability in snap timing.
 Additionally, the QB ranking at the mean level in Figure \ref{fig:fig_qb_mean_posterior_distributions} is also different from the QB snap timing leaderboard in Section \ref{sec:leaderboard}.
-Hence, a quarterback can be consistent or variable with managing snap timing, but this does not necessarily depend on the duration of the snap timing itself on average.
+Hence, a quarterback can be consistent or variable with managing snap timing, and this does not necessarily depend on the duration of the snap timing itself on average.
 
 Next, Figure \ref{fig:fig_receiver_posterior_distributions} shows the posterior distributions for the motion player random effect $b_m$ for those in motion 20 times or more across the motion plays in our final sample.
 We notice that Stefon Diggs and Tyreek Hill are the top two receivers in terms of their posterior mean values.
