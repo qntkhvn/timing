@@ -240,7 +240,7 @@ Or, a team may also employ the jet motion to bring a receiver from one side of t
 This information, unlike the other variables, is not provided in the data, prompting us to consider a clustering algorithm to identify the different types of motion in Section \ref{sec:clustering}.
 
 We fit the multilevel model for snap timing in a Bayesian framework via the `brms` package in `R` [@burkner2017brms; @burkner2018advanced; @burkner2021bayesian], which provides an interface for Bayesian modeling with `Stan` [@carpenter2017stan]. 
-We use weakly informative prior distributions for the standard deviation parameters in our model, which are as follows.
+We use the following weakly informative prior distributions for the standard deviation parameters in our model:
 $$
 \begin{aligned}
 \sigma_q &\sim \textsf{half-t}_3\\
@@ -249,6 +249,8 @@ $$
 \tau_q &\sim \textsf{half-t}_3\\
 \end{aligned}
 $$
+where $\textsf{half-t}_3$ represents a half-$t$ distribution (i.e., the absolute value of a Student-$t$ distribution centered at zero) with 3 degrees of freedom (see @gelman2006prior for more details).
+
 Our Bayesian approach naturally provides uncertainty quantification for the model parameters via their posterior distributions, which are estimated using MCMC sampling.
 For model fitting, we use 4 parallel chains, each having 10,000 iterations and 5,000 warmup draws.
 We assess the convergence of the MCMC algorithm with trace plots and the $\widehat{R}$ statistic [@gelman1992inference; @brooks1998general].
