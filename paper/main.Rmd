@@ -76,14 +76,14 @@ To make these fine-grained data accessible and promote public research, the NFL 
 Each year, a sample of tracking data is publicly released to accompany a competition theme on a particular area of football (e.g., secondary, special teams, linemen, etc.).
 Early peer-reviewed articles that leverage Big Data Bowl data mainly provide assessment of offensive production in American football.
 @deshpande2020expected propose a framework for determining the hypothetical completion probability for a passing play.
-@chu2020route detect the types of route ran by receivers via a model-based clustering approach.
+@chu2020route detect the types of route ran by NFL receivers via a model-based clustering approach.
 @yurko2020going introduce a continuous-time play valuation framework which features a model for the expected yards gained at every moment within a play.
 
 Apart from offensive performance evaluation, tracking data have also driven considerable advancements in the assessment of NFL defenders.
 This task was once very challenging, as position groups such as defensive linemen simply lacked reliable metrics to grade their performance prior to the availability of high-resolution data.
 @dutta2020unsupervised use a mixture model to provide labels for the types of pass coverage by defensive backs.
 @nguyen2024here present a novel metric for quantifying defensive pressure by pass rushers at every frame within a play.
-@yurko2024nfl evaluates defensive pass coverage by comparing the defender positioning at the moment of catch to a baseline hypothetical player.
+@yurko2024nfl evaluate defensive pass coverage by comparing the defender positioning at the moment of catch to a baseline hypothetical player.
 @nguyen2025fractional introduce a framework for within-play tackling evaluation, overcoming the limitations of traditional box-score tackles statistics.
 
 Similar to defensive evaluation, it is possible to investigate other areas of football that were relatively understudied in the past with tracking data.
@@ -92,7 +92,11 @@ By employing actions such as motion, shifts, and alignment changes, a team's ult
 For the first time ever, we have access to on-field player locations for the full play---not just after the snap but also before the snap---via the Big Data Bowl 2025 tracking data sample.
 This opens up an opportunity to leverage pre-snap information to better understand team and player behavior during a play post-snap.
 
-<!-- **[[is this good enough for the motivation of snap timing?]]** -->
+<!-- 
+**[[is this good enough for the motivation of snap timing?]]**
+one way to validate that snap timing an actual thing: cite personal communication with the football coach
+-->
+
 Our analysis focuses on a specific aspect of pre-snap motion: the timing between the moment a receiver begins motioning and the ball snap event.
 We are specifically interested in the variability in snap timing, which means across different plays, the offense does not snap the ball at the same time after a receiver goes in motion.
 This can be considered a quarterback (QB) skill, since the QB is responsible for controlling the cadence and ensuring the offense operates smoothly in every play.
