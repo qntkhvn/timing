@@ -557,11 +557,13 @@ read_rds("../data/tracking_motion_clustering.rds") |>
 
 ## Additional multievel model results {#sec:model-supp}
 
-As mentioned in Section \ref{sec:model}, we now offer analyses of the random effects in the mean parameter model for the two group on offense: quarterbacks and motion players.
+As mentioned in Section \ref{sec:model}, we now investigate the random effects in the mean parameter model for the two groups on offense: quarterbacks and motion players.
 In Figure \ref{fig:fig_qb_mean_posterior_distributions}, we visualize the posterior distributions for the random effect $b_q$ (sorted by posterior mean) for the same subset of quarterbacks as before (i.e., those attempting at least 50 passes across the considered plays).
 We also display the joint distribution for the posterior mean estimates of the QB mean and shape random effects ($b_q$ and $u_q$, respectively) in Figure \ref{fig:fig_corr_mean_shape}.
-The scatterplot reveals no inherent relationship between the average and variability snap timing, and the QB ranking in Figure \ref{fig:fig_qb_mean_posterior_distributions} also does not agree with the QB snap timing leaderboard in Section \ref{sec:leaderboard}.
-Hence, a quarterback can be consistent or variable with managing snap timing, this does not necessarily depend on the duration of snap timing itself on average.
+
+As we can see, the scatterplot reveals no inherent relationship between the average and variability in snap timing.
+Additionally, the QB ranking at the mean level in Figure \ref{fig:fig_qb_mean_posterior_distributions} is also different from the QB snap timing leaderboard in Section \ref{sec:leaderboard}.
+Hence, a quarterback can be consistent or variable with managing snap timing, but this does not necessarily depend on the duration of the snap timing itself on average.
 
 Next, Figure \ref{fig:fig_receiver_posterior_distributions} shows the posterior distributions for the motion player random effect $b_m$ for those in motion 20 times or more across the motion plays in our final sample.
 We notice that Stefon Diggs and Tyreek Hill are the top two receivers in terms of their posterior mean values.
@@ -575,7 +577,7 @@ Hence, there is considerable uncertainty in our estimates for both offensive gro
 
 ```{r}
 #| label: fig_qb_mean_posterior_distributions
-#| fig-cap: "Posterior distributions of the quarterback random effect when modeling the mean snap timing. Results shown here are for NFL quarterbacks with at least 50 pass attempts on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted."
+#| fig-cap: "Posterior distributions of the quarterback random effect $b_q$ when modeling the mean snap timing. Results shown here are for NFL quarterbacks with at least 50 pass attempts on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted."
 #| out-width: 75%
 knitr::include_graphics("../figures/qb_mean_posteriors_slab.png")
 ```
@@ -590,7 +592,7 @@ readRDS("../figures/corr_mean_shape.rds")
 
 ```{r}
 #| label: fig_receiver_posterior_distributions
-#| fig-cap: "Posterior distributions of the motion player random effect when modeling the mean snap timing. Results shown here are for NFL receivers with at least 20 times going in motion on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted."
+#| fig-cap: "Posterior distributions of the motion player random effect $b_m$ when modeling the mean snap timing. Results shown here are for NFL receivers with at least 20 times going in motion on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted."
 #| out-width: 75%
 knitr::include_graphics("../figures/receiver_posteriors_slab.png")
 ```
