@@ -13,8 +13,6 @@ plays_snap_timing <- plays_motion |>
          position = ifelse(position %in% c("FB", "RB"), "B", position))
 
 # fit model
-
-# fit model
 library(brms)
 snap_timing_fit <- brm(
   bf(
@@ -50,4 +48,44 @@ snap_timing_fit |>
 snap_timing_fit |> 
   bayesplot::pp_check()
 
+# model comparison
 
+plays_location_change <- plays_motion |>
+  inner_join(plays_frame_end) |> 
+  select(gameId, playId, nflId, frame_motion, frame_end) |> 
+  pivot_longer(starts_with("frame_"), values_to = "frameId") |>
+  select(-name) |>
+  inner_join(tracking_players_motion_at_snap) |>
+  group_by(gameId, playId, nflId) |>
+  summarize(y_change = max(y) - min(y)) |>
+  ungroup()
+
+plays_snap_timing_comparison <- plays_snap_timing |> 
+  left_join(plays_location_change)
+
+# fit model
+library(brms)
+snap_timing_fit_no_cluster <- brm(
+  bf(
+    # mean
+    frame_between ~
+      factor(down) + play_clock_at_motion + factor(posteam_timeouts_remaining) + 
+      position + n_motion_since_line_set + factor(routeRan) + y_change +
+      (1 | passer_player_id) + (1 | nflId) + (1 | defensiveTeam),
+    # variance
+    shape ~ (1 | passer_player_id)
+  ),
+  family = Gamma(link = "log"),
+  chains = 4,
+  iter = 10000,
+  warmup = 5000,
+  seed = 3,
+  cores = 4,
+  backend = "cmdstanr",
+  data = plays_snap_timing_comparison
+)
+
+
+# validation
+snap_timing_loo <- brms::loo(snap_timing_fit_no_cluster, 
+                             snap_timing_fit)

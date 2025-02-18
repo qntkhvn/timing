@@ -144,28 +144,43 @@ plays_motion_rate_overall <- player_play_offense |>
   summarize(motion_since_line_set_rate_overall = mean(motion)) |> 
   ungroup()
 
-plays_motion_rate_overall |> 
+
+corr_motion_havoc <- plays_motion_rate_overall |> 
   full_join(plays_havoc_rate_overall) |> 
   filter(passer_player_id %in% qb_filtered$passer_player_id) |> 
+  left_join(nflreadr::load_teams(), by = c("posteam" = "team_abbr")) |> 
   # summarize(cor(motion_since_line_set_rate_overall, havoc_rate_overall))
   ggplot(aes(motion_since_line_set_rate_overall, havoc_rate_overall)) +
   geom_smooth(method = lm, se = FALSE,
               color = "gray",
               linetype = "dashed") +
-  geom_point(size = 3) +
-  ggrepel::geom_text_repel(aes(label = passer_player_name))
+  geom_point(alpha = 0.6, size = 3, aes(color = I(team_color))) +
+  ggrepel::geom_text_repel(aes(label = passer_player_name), size = rel(2.5), seed = 2) +
+  labs(x = "Motion rate across all passing plays",
+       y = "Havoc rate across all passing plays")
+
+# corr_motion_havoc |>
+#   write_rds("figures/corr_motion_havoc.rds")
 
 # shape rand eff posterior mean vs motion rate
 
-plays_motion_rate_overall |> 
+corr_shape_motion <- plays_motion_rate_overall |> 
   inner_join(qb_shape_posterior) |> 
+  filter(passer_player_id %in% qb_filtered$passer_player_id) |> 
+  left_join(select(plays_havoc_rate_overall, passer_player_id, posteam)) |> 
+  left_join(nflreadr::load_teams(), by = c("posteam" = "team_abbr")) |> 
   # summarize(cor(motion_since_line_set_rate_overall, posterior_mean_shape))
   ggplot(aes(posterior_mean_shape, motion_since_line_set_rate_overall)) +
   geom_smooth(method = lm, se = FALSE,
               color = "gray",
               linetype = "dashed") +
-  geom_point(size = 3) +
-  ggrepel::geom_text_repel(aes(label = passer_player_name))
+  geom_point(alpha = 0.6, size = 3, aes(color = I(team_color))) +
+  ggrepel::geom_text_repel(aes(label = passer_player_name), size = rel(2.5), seed = 20) +
+  labs(x = "Posterior mean for QB shape random effect",
+       y = "Motion rate across all passing plays")
+
+# corr_shape_motion |>
+#   write_rds("figures/corr_shape_motion.rds")
 
 
 # look at the mean parameter
@@ -181,10 +196,22 @@ qb_mean_posterior <- snap_timing_fit |>
   arrange(posterior_mean_mu)
 
 # no relationship between mean and variance parameter
-qb_mean_posterior |> 
+# r = -0.07
+corr_mean_shape <- qb_mean_posterior |> 
   left_join(qb_shape_posterior) |> 
-  ggplot(aes(posterior_mean_mu, posterior_mean_shape)) +
-  geom_point()
+  left_join(select(plays_havoc_rate_overall, passer_player_id, posteam)) |> 
+  left_join(nflreadr::load_teams(), by = c("posteam" = "team_abbr")) |> 
+  ggplot(aes(posterior_mean_shape, posterior_mean_mu)) +
+  geom_smooth(method = lm, se = FALSE,
+              color = "gray",
+              linetype = "dashed") +
+  geom_point(alpha = 0.6, size = 3, aes(color = I(team_color))) +
+  ggrepel::geom_text_repel(aes(label = passer_player_name), size = rel(2.4), seed = 33) +
+  labs(x = expression(paste("Posterior mean of ", u[q])),
+       y = expression(paste("Posterior mean of ", b[q])))
+
+# corr_mean_shape |>
+#   write_rds("figures/corr_mean_shape.rds")
 
 
 # look at receivers

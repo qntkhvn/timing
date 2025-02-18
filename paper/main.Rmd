@@ -17,7 +17,7 @@ date: \today
 # documentclass: amsart
 fontsize: 11pt
 geometry: margin=1.25in
-linestretch: 1.1
+linestretch: 1
 # fontfamily: libertine
 indent: true
 link-citations: true
@@ -31,9 +31,12 @@ abstract: |
   |
   | *Keywords:* Bayesian statistics, multilevel model, uncertainty quantification, tracking data, American football
 header-includes:
-  \usepackage[scaled=1]{inconsolata}
+  \usepackage[scaled=0.98]{inconsolata}
   \usepackage{float}
   \usepackage{caption}
+  \usepackage{enumitem}
+  \setlist[itemize,1]{label=$\circ$}
+  \setlist[itemize,2]{label=$\diamond$}
   \edef\restoreparindent{\parindent=\the\parindent\relax}
   \usepackage[parfill]{parskip}
   \restoreparindent
@@ -47,7 +50,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE,
   fig.align = "center",
-  fig.pos = "tbp"
+  fig.pos = "ptb"
   # cache = TRUE
 )
 library(here)
@@ -55,9 +58,11 @@ library(tidyverse)
 theme_set(theme_light())
 ```
 
-\newpage
-\captionsetup{font={stretch=1.1}}
-\renewcommand{\arraystretch}{1.1}
+<!-- \newpage -->
+
+<!-- \captionsetup{font={stretch=1.25}} -->
+<!-- \renewcommand{\arraystretch}{1.25} -->
+
 \setlength{\parskip}{0.25\baselineskip}
 
 # Introduction {#sec:introduction}
@@ -75,7 +80,7 @@ Early peer-reviewed articles that leverage Big Data Bowl data mainly provide ass
 @yurko2020going introduce a continuous-time play valuation framework which features a model for the expected yards gained at every moment within a play.
 
 Apart from offensive performance evaluation, tracking data have also driven considerable advancements in the assessment of NFL defenders.
-This task was challenging previously, as position groups such as defensive linemen simply lacked reliable metrics to grade their performance prior to the availability of high-resolution data.
+This task was once very challenging, as position groups such as defensive linemen simply lacked reliable metrics to grade their performance prior to the availability of high-resolution data.
 @dutta2020unsupervised use a mixture model to provide labels for the types of pass coverage by defensive backs.
 @nguyen2024here present a novel metric for quantifying defensive pressure by pass rushers at every frame within a play.
 @yurko2024nfl evaluates defensive pass coverage by comparing the defender positioning at the moment of catch to a baseline hypothetical player.
@@ -87,7 +92,7 @@ By employing actions such as motion, shifts, and alignment changes, a team's ult
 For the first time ever, we have access to on-field player locations for the full play---not just after the snap but also before the snap---via the Big Data Bowl 2025 tracking data sample.
 This opens up an opportunity to leverage pre-snap information to better understand team and player behavior during a play post-snap.
 
-**[[is this good enough for the motivation of snap timing?]]**
+<!-- **[[is this good enough for the motivation of snap timing?]]** -->
 Our analysis focuses on a specific aspect of pre-snap motion: the timing between the moment a receiver begins motioning and the ball snap event.
 We are specifically interested in the variability in snap timing, which means across different plays, the offense does not snap the ball at the same time after a receiver goes in motion.
 This can be considered as a quarterback (QB) skill, since the QB is responsible for controlling the cadence and ensuring the offense operates smoothly in every play.
@@ -101,7 +106,7 @@ We implement our multilevel model in a Bayesian framework, which allows us to qu
 Ultimately, our approach culminates in a measure of variability in QB snap timing, which is demonstrated to be predictive of the rate of havoc created by the opposing defense.
 We believe our contribution provides a novel description of snap timing variability and reveals insights into an understudied area of American football.
 
-The structure of our paper is as follows.
+The structure for the remainder of our paper is as follows.
 In Section \ref{sec:data}, we offer an overview of the player tracking data in American football.
 Next, we describe in detail our multilevel modeling methodology in Section \ref{sec:methods}.
 We then discuss our modeling results and insights in Section \ref{sec:results}, before closing with our concluding remarks in Section \ref{sec:discussion}.
@@ -154,6 +159,7 @@ We define the snap timing for play $i$ as the number of frames elapsed between t
 That is, $$\delta_i = t_i^{\text{snap}}-t_i^{\text{motion}}.$$
 Here, it is straightforward to obtain $t_i^{\text{snap}}$ using the frame label in the tracking data.
 Conversely, identifying $t_i^{\text{motion}}$ requires more effort, due to inconsistency between player-level motion indicators and annotated tracking events, as acknowledged by the competition organizers[^inconsistency].
+
 We use the following procedure to determine $t_i^{\text{motion}}$ for each play.
 
 * For plays where the player in motion at snap is also the only player in motion since line set, we identify  $t_i^{\text{motion}}$ as the frame of the `man_in_motion` event provided in the tracking data.
@@ -164,7 +170,7 @@ We use the following procedure to determine $t_i^{\text{motion}}$ for each play.
     
     * We then choose the average ratio value of 0.45 as the threshold for determining the start of motion for the remaining plays. Specifically, we assign $t_i^{\text{motion}}$ as the first frame between line set and ball snap where the player reaches at least 45% of their top speed.
     
-[^inconsistency]: See https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709.
+[^inconsistency]: See [`https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709`](https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/discussion/543709).
 
 For context, Figure \ref{fig:fig_timing_distribution} displays the snap timing distribution for plays with receivers in motion at snap and running a route.
 We observe a right skewed distribution, as about 95% of the snap timing values are within 50 frames (or 5 seconds), with a median of 17 frames (i.e., 1.7 seconds between the start of motion and ball snap).
@@ -199,10 +205,12 @@ To this end, we fit the following multilevel model:
 $$
 \begin{aligned}
 \delta_i&\sim\textsf{Gamma}(\mu_i,\alpha_i)\\
+\\
 \log\mu_i&=\gamma_0+\boldsymbol{\beta X_i}+b_{q[i]}+b_{m[i]}+b_{d[i]}\\
 b_q&\sim\textsf{Normal}(0,\sigma^2_q)\\
 b_m&\sim\textsf{Normal}(0,\sigma^2_m)\\
 b_d&\sim\textsf{Normal}(0,\sigma^2_d)\\
+\\
 \log\alpha_i&=\psi_0+u_{q[i]}\\
 u_q&\sim\textsf{Normal}(0,\tau^2_q)\\
 \end{aligned}
@@ -256,7 +264,8 @@ As alluded to in Section \ref{sec:model}, we aim to perform a cluster analysis t
 This ultimately allows us to include the identified motion clusters as a covariate in our multilevel model for snap timing.
 To do so, we first derive features characterizing the locations and trajectories of motion players at various points during a play, so that a clustering of these variables will output a meaningful interpretation of the motion type.
 
-Our clustering input contains tracking data features describing the motion player's location at different on-field events relative to where the center lines up before the snap.
+Our clustering input contains tracking data features describing the receiver locations at different on-field events relative to where the center lines up before the snap.
+To some extent, these space-time attributes should reasonably summarize the magnitude and direction of the motion player's trajectory, capturing their forward and lateral movements throughout a play.
 For illustration, Figure \ref{fig:fig_clustering_features} shows the derived features for the example play with Travis Kelce going in motion as described in Table \ref{tab:tracking}.
 In particular, we compute the following attributes:
 
@@ -300,9 +309,9 @@ Ultimately, we condition on these cluster labels as fixed effects in modeling th
 We now examine the estimates of the fixed effects coefficients and variance parameters of our model.
 Table \ref{tab:fixedeff} summarizes the results for the fixed effects terms of the mean snap timing model in our multilevel framework.
 We notice several interesting results regarding the contextual and personnel covariates.
-Relative to first down plays, the timing between the start of motion by a receiver and the ball snap appears to take longer on second and third downs.
-This could be due to more complex offensive play calls on later downs, or the defense's tendency to disguise their coverages more on crucial downs, requiring the quarterback to make last-second reads and adjustments.
 
+Relative to first down plays, the timing between the start of motion by a receiver and the ball snap appears to take longer on second and third downs.
+This could be due to more complex offensive play calls on later downs, or the defense's tendency to disguise their coverage more on crucial downs, requiring the quarterback to make last-second reads and adjustments.
 We also see that on average, the snap timing tends to be longer when there are no timeouts left for the offense.
 The lacks of timeouts can affect the offense to be more deliberate in execution, hence taking more time between motion and snap than when there are one or more timeouts available.
 In addition, we observe differences among the receiver positions, as plays with running backs going in motion have shorter snap timing than for tight ends and wide receivers.
@@ -341,8 +350,8 @@ $I_{\text{\{motion:6\}}}$ & $0.154$ & $0.064$ & $0.029$ & $0.281$ \\
 Next, Table \ref{tab:randeff} presents posterior estimates for the standard deviation of the random effect terms in our multilevel model.
 For the model of mean snap timing parameter $\mu$, we observe the highest posterior mean for the standard deviation of motion players ($\hat \sigma_m = 0.151$), followed by quarterbacks ($\hat \sigma_q = 0.093$) and defenses ($\hat \sigma_d = 0.029$).
 Note that the standard deviation estimates for the two offensive groups are farther away from zero than the defensive team's, suggesting variability between players within each position group.
+For both motion players and quarterbacks, we provide analyses of their random effects $b_q$ and $b_m$ in Section \ref{sec:model-supp} of the Supplementary Materials, with Figures \ref{fig:fig_qb_mean_posterior_distributions} and \ref{fig:fig_receiver_posterior_distributions} showing their respective posterior distributions.
 
-For both motion players and quarterbacks, we provide analyses of their random effects $b_q$ and $b_m$ at the mean level in Section \ref{sec:model-supp} of the Supplementary Materials, with Figures \ref{fig:fig_receiver_posterior_distributions} and \ref{fig:fig_qb_mean_posterior_distributions} showing their respective posterior distributions.
 More importantly, among all considered random effects, the largest source variation is between quarterbacks when modeling the snap timing shape $\alpha$, as captured by $\hat \tau_q = 0.297$.
 Thus, we focus on the QB shape random effects $u_q$ in the following analysis.
 
@@ -363,14 +372,14 @@ $\tau_q$ & $0.297$ & $0.052$ & $0.205$ & $0.409$ \\
 \end{table}
 
 
-## Quarterback leaderboard
+## Quarterback leaderboard {#sec:leaderboard}
 
 Figure \ref{fig:fig_posterior_distributions} displays the posterior distributions for the shape random effect $u_q$ for quarterbacks with at least 50 pass attempts across the considered motion plays.
 Here, the player ordering is based on the posterior mean estimate, which captures a quarterback's ability to maintain variable snap timing.
 More specifically, a higher posterior mean values corresponds to greater variability in timing between the start of motion and snap.
 
 At the top of our leaderboard, Patrick Mahomes stands out as the highest ranked QB according our measure, adding the ability to time snaps as another element to his success.
-Other high-caliber QBs such as Tom Brady and Josh Allen are also among the leaders in our rankings.
+Other high-caliber quarterbacks such as Tom Brady and Josh Allen are also among the leaders in our rankings.
 Note that there is considerable uncertainty in our estimates, as demonstrated by the rather wide credible intervals.
 We also observe that most of the posterior distributions are not entirely above or below zero. 
 This is unsurprising given our limited sample of motion plays.
@@ -382,7 +391,7 @@ This indicates that our posterior mean estimates provide discriminative power fo
 ```{r}
 #| label: fig_posterior_distributions
 #| fig-cap: "Posterior distributions of the shape random effect for NFL quarterbacks with at least 50 pass attempts on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted. Here, a higher posterior mean demonstrates greater variability in snap timing."
-#| out-width: 70%
+#| out-width: 75%
 knitr::include_graphics("../figures/posteriors_slab_paper.png")
 ```
 
@@ -404,8 +413,8 @@ Note that although we focus on snap timing for passing plays with motion, our es
 knitr::include_graphics("../figures/corr_havoc_paper.png")
 ```
 
-As a side note, the posterior mean for the shape random effect scarcely correlates with the rate of motion on all passing plays $(r=0.11)$ during the first nine weeks of the 2022 season.
-Over this period, there is also a weak correlation between the motion rate and havoc rate across all passing plays $(r=-0.09)$.
+As a side note, the posterior mean for the shape random effect scarcely correlates with the rate of motion on all passing plays during the first nine weeks of the 2022 season ($r=0.11$; see Figure \ref{fig:fig_corr_shape_motion} in the Supplementary Materials).
+Over this period, there is also a weak correlation between the motion rate and havoc rate across all passing plays ($r=-0.09$; see Figure \ref{fig:fig_corr_motion_havoc} in the Supplementary Materials).
 This suggests that our measure of QB snap timing variability provides independent information of motion tendency, while also being a more direct indicator of encountering defensive disruptions than the rate of motion.
 
 # Discussion {#sec:discussion}
@@ -415,28 +424,26 @@ Through multilevel modeling, we provide an assessment of a quarterback's ability
 We assume a Gamma distribution for our outcome variable---the snap timing on a play---and account for relevant fixed effects to capture mean shifts in snap timing along with random effects for the quarterback, motion receiver, and opposing defense.
 We also include QB random effects to model the shape parameter of the Gamma distribution, enabling us to estimate the differences in snap timing variability between NFL quarterbacks.
 Since our model is fit in a Bayesian framework, it allows us to quantify uncertainty with posterior distributions of all model parameters.
-Our result suggests that higher variability in snap timing is beneficial for the passing game, as it relates to experiencing less disruptions generated by the defense.
+Our results suggest that higher variability in snap timing is beneficial for the passing game, as it relates to experiencing less disruptions generated by the defense.
 
 Our proposed framework is not without limitations.
 First, to identify the start of motion, we use a threshold-based criterion which relies on the moment the motion player achieves a certain fraction of their top speed before the snap.
 This is certainly a simple viewpoint, as one could come up with a more robust definition by building a predictive model to detect the starting motion frame.
 Second, despite the reasonable set of inputs in our cluster analysis, there is room for improvement in identifying the motion types.
 It is possible to derive more refined contextual and tracking features, or alternatively consider a functional clustering approach.
-We highlight that our framework is modular, so that our simple algorithm in Section \ref{sec:clustering} can be replaced by other approaches for clustering the type of motion.
+We highlight that the current modeling framework is modular, so that our simple algorithm in Section \ref{sec:clustering} can be replaced by other approaches for clustering the type of motion.
 For example, one could adapt a model-based curve clustering strategy similar to what @chu2020route use for route identification, to the context of motion types of receivers.
 Since neither of these tasks is the main focus of our work, we leave these explorations for the future.
 
 Additionally, our study is limited to only passing plays with receivers in motion at snap.
 This introduces a selection bias into our analysis by disregarding running plays in the provided data sample.
 Moreover, we exclude various quarterbacks who do not meet the cutoff for minimum pass attempts on motion plays (e.g., Jalen Hurts and Joe Burrow).
-We also recognize that while our estimates are referred to as "QB random effects", they are certainly correlated with the team's center and coach's play-calling.
-For instance, the success on offense of the 2022 Kansas City Chiefs (the year in which they won the Super Bowl) is not solely due to Patrick Mahomes, but also because of the brilliant offensive mind of head coach Andy Reid.
-The starting center, Creed Humphrey, who was one of the top centers in 2022 (named Pro Bowl and second-team All-Pro), also plays a major part in the team's snap timing execution.
-We leave the exploration of these challenging issues for future work.
+We also recognize that while our estimates are referred to as *QB random effects*, they are certainly correlated with the team's center and coach's play-calling.
+For instance, the success on offense of the 2022 Kansas City Chiefs is not solely due to the greatness of Patrick Mahomes.
+Instead, the brilliant offensive mind of head coach Andy Reid, as well as their starting center Creed Humphrey (named Pro Bowl and second-team All-Pro in 2022), both play a important part in the team's snap timing execution.
+We recognize that these are challenging issues, and leave these investigations for future work.
 
-**[[more discussions???]]**
-
-
+<!-- **[[more discussions???]]** -->
 
 # Acknowledgements {-}
 
@@ -470,7 +477,7 @@ All code related to this paper is available at [`https://github.com/qntkhvn/timi
 #| fig-cap: "Distribution of the ratio between the motion player's speed at $\\texttt{man\\_in\\_motion}$ event and their maximum speed between line set and ball snap (for plays where the receiver in motion at snap is the only player going in motion since line set). The red dashed line represents the average value of 0.45, which is chosen as the threshold for identifying motion for the rest of the plays."
 #| fig-width: 6
 #| fig-height: 2.5
-#| fig-pos: "ht"
+#| fig-pos: "H"
 read_rds("../data/motion_speed_ratio.rds") |> 
   ggplot(aes(frac_s)) +
   geom_histogram(bins = 40, fill = "gray90", color = "gray30", center = 0.5, closed = "left") +
@@ -485,7 +492,7 @@ read_rds("../data/motion_speed_ratio.rds") |>
 #| fig-cap: "Distribution for the number of frames between the snap and motion player crossing the line of scrimmage (for plays where motion players cross the line of scrimmage). The red dashed line represents the time threshold of 30 frames (i.e., 3 seconds), which captures about 95\\% of the values."
 #| fig-width: 6
 #| fig-height: 2.5
-#| fig-pos: "ht"
+#| fig-pos: "H"
 read_rds("../data/snap_to_cross_loss.rds") |> 
   ggplot(aes(frame_snap_to_cross_los)) +
   geom_histogram(bins = 40, fill = "gray90", color = "gray30", center = 0.5, closed = "left") +
@@ -496,23 +503,36 @@ read_rds("../data/snap_to_cross_loss.rds") |>
        y = "Frequency")
 ```
 
+```{r}
+#| label: fig_corr_shape_motion
+#| fig.cap: "Relationship between the posterior mean of the QB shape random effect and the rate of motion by their corresponding team for all passing plays in the first nine weeks of the 2022 NFL season $(r= 0.11)$. Results shown here are for NFL quarterbacks with at least 50 pass attempts on plays with receivers in motion at snap and running a route."
+#| fig.width: 3.6
+#| fig.height: 3
+readRDS("../figures/corr_shape_motion.rds")
+```
+
+```{r}
+#| label: fig_corr_motion_havoc
+#| fig.cap: "Relationship between the motion rate and havoc rate across all passing plays in the first nine weeks of the 2022 NFL season $(r= -0.09)$. Results shown here are for NFL quarterbacks with at least 50 pass attempts on plays with receivers in motion at snap and running a route."
+#| fig.width: 3.6
+#| fig.height: 3
+readRDS("../figures/corr_motion_havoc.rds")
+```
+
 ## Additional clustering results {#sec:clustering-supp}
 
-We visually inspect and analyze the results of fitting the Gaussian mixture model in Section \ref{sec:clustering} for clustering the type of receiver motion.
+We visually inspect and analyze the results of fitting the Gaussian mixture model for characterizing the type of receiver motion as described in Section \ref{sec:clustering}.
 Figure \ref{fig:fig_motion_clusters} displays sample paths of motion players in each of the 6 identified clusters from the starting point of motion (in red) to the ball snap (in blue).
 We observe clear structural differences in the player paths between the motion labels, which validates our clustering output.
 
 We can then interpret the cluster assignments to add more football context to the results.
 For instance, cluster 2 represents the orbit motion, as the motion happens behind the quarterback with the motion player moving laterally until the snap; cluster 3 illustrates the jet motion, where the motion player runs laterally across the formation; cluster 4 depicts the glide motion, with the motion player initially lining up in an outside wide alignment before moving laterally toward the inside; and so on.
 
-
-<!-- To add more context, we interpret our cluster assignments as follows. -->
-
 ```{r}
 #| label: fig_motion_clusters
 #| fig-cap: "A sample of 100 player trajectories between motion and snap in each cluster label obtained from the Gaussian mixture model."
 #| fig-height: 5
-
+#| fig-pos: "H"
 set.seed(15)
 players_sample <- read_rds("../data/tracking_motion_clustering.rds") |> 
   distinct(gameId, playId, nflId, cluster) |> 
@@ -535,24 +555,51 @@ read_rds("../data/tracking_motion_clustering.rds") |>
 
 ## Additional multievel model results {#sec:model-supp}
 
-Figure \ref{fig:fig_receiver_posterior_distributions}
+As mentioned in Section \ref{sec:model}, we now offer analyses of the random effects in the mean parameter model for the two group on offense: quarterbacks and motion players.
+In Figure \ref{fig:fig_qb_mean_posterior_distributions}, we visualize the posterior distributions for the random effect $b_q$ (sorted by posterior mean) for the same subset of quarterbacks as before (i.e., those attempting at least 50 passes across the considered plays).
+We also display the joint distribution for the posterior mean estimates of the QB mean and shape random effects ($b_q$ and $u_q$, respectively) in Figure \ref{fig:fig_corr_mean_shape}.
+The scatterplot reveals no inherent relationship between the average and variability snap timing, and the QB ranking in Figure \ref{fig:fig_qb_mean_posterior_distributions} also does not agree with the QB snap timing leaderboard in Section \ref{sec:leaderboard}.
+Hence, a quarterback can be consistent or variable with managing snap timing, this does not necessarily depend on the duration of snap timing itself on average.
 
-```{r}
-#| label: fig_receiver_posterior_distributions
-#| fig-cap: "Posterior distributions of the motion player random effect (when modeling the mean snap timing). Results shown here are for receivers with at least 20 times going in motion on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted."
-#| out-width: 70%
-knitr::include_graphics("../figures/receiver_posteriors_slab.png")
-```
+Next, Figure \ref{fig:fig_receiver_posterior_distributions} shows the posterior distributions for the motion player random effect $b_m$ for those in motion 20 times or more across the motion plays in our final sample.
+We notice that Stefon Diggs and Tyreek Hill are the top two receivers in terms of their posterior mean values.
+These are two of the most elite receivers in 2022, with Tyreek Hill especially being known for his lightning-quick running speed and was part of the electric 2022 Miami Dolphins offense.
+Thus, at first glance, one could suspect that these estimates are indicative of receiver quickness and agility to some degree.
 
-Figure \ref{fig:fig_qb_mean_posterior_distributions}
-
-
+However, in each of Figures \ref{fig:fig_qb_mean_posterior_distributions} and \ref{fig:fig_receiver_posterior_distributions}, we notice an overlap between the 95% credible intervals for the top and bottom players.
+Therefore, unlike the variability in QB snap timing, our estimates when modeling the mean $\mu$ for both quarterbacks and motion players do not appear to differentiate between players.
+We also observe relatively wide credible intervals for all players, and none of the posterior distributions are entirely above or below zero.
+Hence, there is considerable uncertainty in our estimates for both offensive groups, which once again highlights the issue of having only a limited sample of data.
 
 ```{r}
 #| label: fig_qb_mean_posterior_distributions
-#| fig-cap: "Posterior distributions of the quarterback random effect (when modeling the mean snap timing). Results shown here are for quarterbacks with at least 50 pass attempts on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted."
-#| out-width: 70%
+#| fig-cap: "Posterior distributions of the quarterback random effect when modeling the mean snap timing. Results shown here are for NFL quarterbacks with at least 50 pass attempts on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted."
+#| out-width: 75%
 knitr::include_graphics("../figures/qb_mean_posteriors_slab.png")
 ```
 
+```{r}
+#| label: fig_corr_mean_shape
+#| fig.cap: "Relationship between the posterior means of the quarterback random effects $b_q$ and $u_q$ when modeling the mean and shape snap timing, respectively $(r= -0.07)$. Results shown here are for NFL quarterbacks with at least 50 pass attempts on plays with receivers in motion at snap and running a route."
+#| fig.width: 4.5
+#| fig.height: 3.2
+readRDS("../figures/corr_mean_shape.rds")
+```
+
+```{r}
+#| label: fig_receiver_posterior_distributions
+#| fig-cap: "Posterior distributions of the motion player random effect when modeling the mean snap timing. Results shown here are for NFL receivers with at least 20 times going in motion on plays with receivers in motion at snap and running a route. For each player, the posterior mean point estimate and corresponding credible intervals are depicted."
+#| out-width: 75%
+knitr::include_graphics("../figures/receiver_posteriors_slab.png")
+```
+
+<!-- 
+
+Maybe save this, do it IF a reviewer asks for it
+
 ## Model comparison
+
+We also consider a multilevel model where the variables included as fixed effects are the same as before, except for the motion type.
+Instead, we attempt to use the following two covariates as proxy to motion type: the route ran by the receiver, and the change in displacement between snap and {crossing LOS, 3 sec}
+
+-->
