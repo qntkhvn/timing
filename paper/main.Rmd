@@ -556,7 +556,7 @@ read_rds("../data/tracking_motion_clustering.rds") |>
   theme(legend.position = "bottom")
 ```
 
-## Additional multievel model results {#sec:model-supp}
+## Additional multilevel model results {#sec:model-supp}
 
 Here, we investigate the random effects in the mean parameter model for the two groups on offense: quarterbacks and motion players, resulting from fitting the multilevel model for snap timing described in Section \ref{sec:model}.
 In Figure \ref{fig:fig_qb_mean_posterior_distributions}, we visualize the posterior distributions for the random effect $b_q$ (sorted by posterior mean) for the same subset of quarterbacks as before (i.e., those attempting at least 50 passes across the considered plays).
