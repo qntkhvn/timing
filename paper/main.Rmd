@@ -572,7 +572,7 @@ Hence, a quarterback can be consistent or variable with managing snap timing, an
 
 Next, Figure \ref{fig:fig_receiver_posterior_distributions} shows the posterior distributions for the motion player random effect $b_m$ for those in motion 20 times or more across the motion plays in our final sample.
 We notice that Stefon Diggs and Tyreek Hill are the top two receivers in terms of their posterior mean values.
-These are two of the most elite receivers in 2022, with Tyreek Hill especially being known for his lightning-quick running speed and was part of the electric 2022 Miami Dolphins offense.
+These are two of the most elite wide receivers in 2022, with Tyreek Hill especially being known for his lightning-quick running speed and was part of the electric 2022 Miami Dolphins offense.
 Thus, at first glance, one could suspect that these estimates are indicative of receiver quickness and agility to some degree.
 
 However, in each of Figures \ref{fig:fig_qb_mean_posterior_distributions} and \ref{fig:fig_receiver_posterior_distributions}, we notice an overlap between the 95% credible intervals for the top and bottom players.
