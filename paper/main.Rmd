@@ -272,8 +272,8 @@ To do so, we first derive features characterizing the locations and trajectories
 
 Our clustering input contains tracking data features describing the receiver locations at different on-field events in relation to where the center lines up before the snap.
 To some extent, these space-time attributes should reasonably summarize the magnitude and direction of the motion player's trajectory, capturing their forward and lateral movements throughout a play.
-Note that our strategy to provide annotations for the motion types is similar to the approach in @dutta2020unsupervised for identifying defensive coverage types.
-That is, we first extract features based on the high-resolution tracking data, before performing clustering to provide proper event annotations.
+Note that our motion type detection strategy is similar to the approach in @dutta2020unsupervised for identifying defensive coverage types.
+That is, we extract features based on the high-resolution tracking data before performing model-based clustering to provide event annotations.
 In general, this can be applied to various unsupervised labeling problems in sports, given the availability of tracking data. 
 
 For illustration, Figure \ref{fig:fig_clustering_features} shows the derived features for the example play with Travis Kelce going in motion as described in Table \ref{tab:tracking}.
@@ -308,7 +308,7 @@ We use the Bayesian information criterion [@schwarz1978estimating] to select the
 After fitting, a mixture of $G^*=6$ ellipsoidal multivariate Gaussian distributions with varying volume, shape, and orientation (VVV) is deemed the best model.
 We further validate our results through visual inspection of motion trajectories of players from the 6 identified clusters (see Section \ref{sec:clustering-supp} of the Supplementary Materials).
 
-We emphasize that our motion identification approach is only a starting point and should serve as a foundation for future work.
+We emphasize that our approach for providing annotations for the motion types is only a starting point and should serve as a foundation for future work.
 We note that future improvements regarding feature engineering and unsupervised learning algorithm may produce more reasonable clustering results, which will be discussed in Section \ref{sec:discussion}.
 Ultimately, we condition on these cluster labels as fixed effects in modeling the mean parameter $\mu$, so that our estimates of QB snap timing variability $u_q$ at the shape level are not confounded by different types of motion.
 
