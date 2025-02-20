@@ -258,7 +258,7 @@ where $\textsf{half-t}_3$ represents a half-$t$ distribution (i.e., the absolute
 Our Bayesian approach naturally provides uncertainty quantification for the model parameters via their posterior distributions, which are estimated using MCMC sampling.
 For model fitting, we use 4 parallel chains, each having 10,000 iterations and 5,000 warmup draws.
 We assess the convergence of the MCMC algorithm with trace plots and the $\widehat{R}$ statistic [@gelman1992inference; @brooks1998general].
-We find good evidence of convergence after visual inspection of trace plots, as also supported by all $\widehat{R}$ values being very close to 1.
+We find good evidence of convergence after visual inspection of the trace plots, as also supported by all $\widehat{R}$ values being very close to 1.
 We also compute the effective sample size for each parameter [@gelman2013bayesian] and observe no issues with model efficiency.
 
 <!-- https://www.rdocumentation.org/packages/brms/versions/1.3.1/topics/set_prior -->
