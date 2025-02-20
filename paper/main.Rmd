@@ -270,8 +270,12 @@ As alluded to in Section \ref{sec:model}, we aim to perform a cluster analysis t
 This ultimately allows us to include the identified motion clusters as a covariate in our multilevel model for snap timing.
 To do so, we first derive features characterizing the locations and trajectories of motion players at various points during a play, so that a clustering of these variables will output a meaningful interpretation of the motion type.
 
-Our clustering input contains tracking data features describing the receiver locations at different on-field events relative to where the center lines up before the snap.
+Our clustering input contains tracking data features describing the receiver locations at different on-field events in relation to where the center lines up before the snap.
 To some extent, these space-time attributes should reasonably summarize the magnitude and direction of the motion player's trajectory, capturing their forward and lateral movements throughout a play.
+Note that our strategy to provide annotations for the motion types is similar to the approach in @dutta2020unsupervised for identifying defensive coverage types.
+That is, we first extract features based on the high-resolution tracking data, before performing clustering to provide proper event annotations.
+In general, this can be applied to various unsupervised labeling problems in sports, given the availability of tracking data. 
+
 For illustration, Figure \ref{fig:fig_clustering_features} shows the derived features for the example play with Travis Kelce going in motion as described in Table \ref{tab:tracking}.
 In particular, we compute the following attributes:
 
@@ -355,7 +359,7 @@ $I_{\text{\{motion:6\}}}$ & $0.154$ & $0.064$ & $0.029$ & $0.281$ \\
 
 Next, Table \ref{tab:randeff} presents posterior estimates for the standard deviation of the random effect terms in our multilevel model.
 For the model of mean snap timing parameter $\mu$, we observe the highest posterior mean for the standard deviation of motion players ($\hat \sigma_m = 0.151$), followed by quarterbacks ($\hat \sigma_q = 0.093$) and defenses ($\hat \sigma_d = 0.029$).
-Note that the standard deviation estimates for the two offensive groups are farther away from zero than the defensive team's, suggesting variability between players within each position group.
+Note that the standard deviation estimates for the two offensive groups are farther away from zero than the defensive team's, suggesting some level of variability between players within each position group.
 For both motion players and quarterbacks, we provide analyses of their random effects $b_q$ and $b_m$ in Section \ref{sec:model-supp} of the Supplementary Materials, with Figures \ref{fig:fig_qb_mean_posterior_distributions} and \ref{fig:fig_receiver_posterior_distributions} showing their respective posterior distributions.
 
 More importantly, among all considered random effects, the largest source variation is between quarterbacks when modeling the snap timing shape $\alpha$, as captured by $\hat \tau_q = 0.297$.
