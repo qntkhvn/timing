@@ -362,8 +362,9 @@ For the model of mean snap timing parameter $\mu$, we observe the highest poster
 Note that the standard deviation estimates for the two offensive groups are farther away from zero than the defensive team's, suggesting some level of variability between players within each position group.
 For both motion players and quarterbacks, we provide analyses of their random effects $b_q$ and $b_m$ in Section \ref{sec:model-supp} of the Supplementary Materials, with Figures \ref{fig:fig_qb_mean_posterior_distributions} and \ref{fig:fig_receiver_posterior_distributions} showing their respective posterior distributions.
 
-More importantly, among all considered random effects, the largest source variation is between quarterbacks when modeling the snap timing shape $\alpha$, as captured by $\hat \tau_q = 0.297$.
-Thus, we focus on the QB shape random effects $u_q$ in the following analysis.
+More importantly, among all considered random effects, the largest source variation is captured by $\hat \tau_q = 0.297$.
+Thus, the highest standard deviation estimate is between quarterbacks when modeling the snap timing shape $\alpha$, compared to the rest of the estimates in the mean parameter model.
+This leads us to focus on the QB shape random effects $u_q$ in the following analysis.
 
 \begin{table}[tbp]
 \caption{Posterior estimates for the standard deviation of the random effect terms in the multilevel model for snap timing. \label{tab:randeff}}
