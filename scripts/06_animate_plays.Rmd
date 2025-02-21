@@ -58,7 +58,8 @@ plays <- read_csv("../data/plays.csv")
 ```{r}
 ex1 <- tracking |> 
   filter(gameId == 2022092502, playId == 1180) |> 
-  mutate(first_frame = frameId[which(event == "line_set")][1],
+  mutate(first_frame = frameId[which(event == "huddle_break_offense")][1],
+         # first_frame = frameId[which(event == "line_set")][1],
          last_frame = frameId[which(event == "tackle")][1]) |> 
   filter(frameId >= first_frame & frameId <= last_frame) |> 
   mutate(
@@ -472,6 +473,247 @@ ggplot() +
 ```
 
 
+---
 
+## Create snapshots
 
+```{r}
+plot_field <- function(x) {
+  
+  ggplot() +
+    annotate("rect",
+             xmin = 160/3,
+             xmax = 0,
+             ymin = 15,
+             ymax = 45,
+             fill = scales::alpha("#21ae5f", 0.8)) +
+    annotate("text", 
+             y = seq(20, 40, 10),
+             x = 10,
+             color = "white",
+             # family = "Chivo",
+             label = seq(10, 30, 10),
+             size = 3.5,
+             angle = 90) +
+    annotate("text", 
+             y = seq(20, 40, 10),
+             x = 40,
+             color = "white",
+             # family = "Chivo",
+             label = seq(10, 30, 10),
+             size = 3.5,
+             angle = 270) +
+    annotate("text", 
+             y = setdiff(seq(15, 45, 1), seq(15, 45, 5)),
+             x = 160/3,
+             color = "white",
+             alpha = 0.6,
+             label = "—") +
+    annotate("text", 
+             y = setdiff(seq(15, 45, 1), seq(15, 45, 5)),
+             x = 0,
+             color = "white",
+             alpha = 0.6,
+             label = "—") +
+    annotate("text", 
+             y = setdiff(seq(15, 45, 1), seq(15, 45, 5)),
+             x = 23.36667,
+             color = "white",
+             size = 2.5,
+             label = "—") +
+    annotate("text", 
+             y = setdiff(seq(15, 45, 1), seq(15, 45, 5)),
+             x = 29.96667,
+             color = "white",
+             size = 2.5,
+             label = "—") +
+    annotate("segment", 
+             y = 15,
+             yend = 45,
+             x = c(160/3, 0),
+             xend = c(160/3, 0),
+             color = "white") +
+    annotate("segment", 
+             y = seq(15, 45, 5),
+             yend = seq(15, 45, 5),
+             x = 160/3,
+             xend = 0,
+             linewidth = 0.3,
+             color = "white") +
+    # geom_hline(yintercept = seq(15, 45, 5), color = "white") +
+    annotate("segment", 
+             y = 35,
+             yend = 35,
+             x = 0,
+             xend = 160/3,
+             size = 1.5,
+             color = "#FDE725") +
+    annotate("segment", 
+             y = 27,
+             yend = 27,
+             x = 0,
+             xend = 160/3,
+             size = 1.5,
+             #000aa0
+             color = "midnightblue") +
+    geom_path(data = filter(path1, frameId >= 59), 
+              aes(y, x, color = motion_color, linetype = motion_linetype), linewidth = 0.5) +
+    geom_line(data = motion1,
+              aes(y, x, color = motion_color, linetype = motion_linetype), linewidth = 0.5) +
+    # geom_line(data = filter(path1, event == {{x}}), 
+    #           aes(y, x, color = motion_color, linetype = motion_linetype, linewidth = motion_linewidth)) +
+    geom_point(data = filter(club1, club == "IND" & event == {{x}}), 
+               aes(y, x, fill = pt_fill_order, size = pt_size*0.54, group = nflId), shape = 21) +
+    geom_point(data = filter(club1, club == "KC" & event == {{x}}), 
+               aes(y, x, fill = pt_fill_order, size = pt_size*0.6, group = nflId), shape = 21) +
+    geom_point(data = filter(football1, event == {{x}}), 
+               aes(y, x, size = pt_size*0.65, group = nflId), fill = "#654321", shape = 21) +
+    scale_fill_manual(values = c("white", "#002C5F", "gold"),
+                      labels = c("KC", "IND", "Motion (T. Kelce)")) +
+    scale_size_identity() +
+    scale_color_identity() +
+    scale_linetype_identity() +
+    scale_linewidth_identity() +
+    scale_x_reverse() +
+    labs(title = {{x}}) +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11, margin=margin(0,0,0,0)),
+          plot.subtitle = element_text(size = 9.5, face = "italic", hjust = 0.5),
+          text = element_text(family = "Fira Sans", color = "#26282A"),
+          plot.margin=grid::unit(c(3,-3,-1,-3), "mm"),
+          panel.grid = element_blank(),
+          legend.position = "none",
+          axis.text = element_blank(),
+          axis.title = element_blank(),
+          axis.ticks = element_blank())
+}
+```
+
+```{r}
+plot_field_first <- function(x) {
+  
+  ggplot() +
+    annotate("rect",
+             xmin = 160/3,
+             xmax = 0,
+             ymin = 15,
+             ymax = 45,
+             fill = scales::alpha("#21ae5f", 0.8)) +
+    annotate("text", 
+             y = seq(20, 40, 10),
+             x = 10,
+             color = "white",
+             # family = "Chivo",
+             label = seq(10, 30, 10),
+             size = 3.5,
+             angle = 90) +
+    annotate("text", 
+             y = seq(20, 40, 10),
+             x = 40,
+             color = "white",
+             # family = "Chivo",
+             label = seq(10, 30, 10),
+             size = 3.5,
+             angle = 270) +
+    annotate("text", 
+             y = setdiff(seq(15, 45, 1), seq(15, 45, 5)),
+             x = 160/3,
+             color = "white",
+             alpha = 0.6,
+             label = "—") +
+    annotate("text", 
+             y = setdiff(seq(15, 45, 1), seq(15, 45, 5)),
+             x = 0,
+             color = "white",
+             alpha = 0.6,
+             label = "—") +
+    annotate("text", 
+             y = setdiff(seq(15, 45, 1), seq(15, 45, 5)),
+             x = 23.36667,
+             color = "white",
+             size = 2.5,
+             label = "—") +
+    annotate("text", 
+             y = setdiff(seq(15, 45, 1), seq(15, 45, 5)),
+             x = 29.96667,
+             color = "white",
+             size = 2.5,
+             label = "—") +
+    annotate("segment", 
+             y = 15,
+             yend = 45,
+             x = c(160/3, 0),
+             xend = c(160/3, 0),
+             color = "white") +
+    annotate("segment", 
+             y = seq(15, 45, 5),
+             yend = seq(15, 45, 5),
+             x = 160/3,
+             xend = 0,
+             linewidth = 0.3,
+             color = "white") +
+    # geom_hline(yintercept = seq(15, 45, 5), color = "white") +
+    annotate("segment", 
+             y = 35,
+             yend = 35,
+             x = 0,
+             xend = 160/3,
+             size = 1.5,
+             color = "#FDE725") +
+    annotate("segment", 
+             y = 27,
+             yend = 27,
+             x = 0,
+             xend = 160/3,
+             size = 1.5,
+             #000aa0
+             color = "midnightblue") +
+    geom_point(data = filter(club1, club == "IND" & event == {{x}}), 
+               aes(y, x, fill = pt_fill_order, size = pt_size*0.54, group = nflId), shape = 21) +
+    geom_point(data = filter(club1, club == "KC" & event == {{x}}), 
+               aes(y, x, fill = pt_fill_order, size = pt_size*0.6, group = nflId), shape = 21) +
+    geom_point(data = filter(football1, event == {{x}}), 
+               aes(y, x, size = pt_size*0.65, group = nflId), fill = "#654321", shape = 21) +
+    scale_fill_manual(values = c("white", "#002C5F", "gold"),
+                      labels = c("KC", "IND", "Motion (T. Kelce)")) +
+    scale_size_identity() +
+    scale_color_identity() +
+    scale_linetype_identity() +
+    scale_linewidth_identity() +
+    scale_x_reverse() +
+    labs(title = {{x}}) +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11, margin=margin(0,0,0,0)),
+          plot.subtitle = element_text(size = 9.5, face = "italic", hjust = 0.5),
+          text = element_text(family = "Fira Sans", color = "#26282A"),
+          plot.margin=grid::unit(c(3,-3,-1,-3), "mm"),
+          panel.grid = element_blank(),
+          legend.position = "none",
+          axis.text = element_blank(),
+          axis.title = element_blank(),
+          axis.ticks = element_blank())
+}
+```
+
+```{r}
+library(cowplot)
+fig_field <- plot_grid(
+  plot_field_first("huddle_break_offense"),
+  plot_field_first("line_set"),
+  plot_field("man_in_motion"),
+  plot_field("ball_snap"),
+  plot_field("pass_outcome_caught"),
+  plot_field("tackle"),
+  nrow = 3
+)
+
+ggsave(
+  "figures/field_snapshots.png",
+  plot = fig_field,
+  width = 7.8,
+  height = 8.4,
+  dpi = 1200,
+  bg = "white"
+)
+```
 
