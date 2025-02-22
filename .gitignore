@@ -1,6 +1,7 @@
 # Local files
 data/
 demo/
+paper/cover_letter.Rmd
 
 # Derivative files
 **/*.DS_Store
