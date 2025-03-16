@@ -8,6 +8,13 @@ source("scripts/04_fit_model.R")
 plays_snap_timing <- read_rds("data/plays_snap_timing.rds")
 snap_timing_fit <- read_rds("data/snap_timing_fit.rds")
 
+# plays_snap_timing |> 
+#   left_join(distinct(play_context, passer_player_name, passer_player_id)) |> 
+#   select(gameId:nflId, passer_player_id, passer_player_name, defensiveTeam, 
+#          frame_between, down, play_clock_at_motion, posteam_timeouts_remaining,
+#          position, n_motion_since_line_set, motion_cluster = cluster) |> 
+#   write_csv("scripts/plays_snap_timing_demo.csv.gz")
+
 qb_filtered <- plays_snap_timing |> 
   distinct(gameId, playId, passer_player_id, passer_player_name) |> 
   count(passer_player_id, passer_player_name) |>
