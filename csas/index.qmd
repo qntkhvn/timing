@@ -478,7 +478,7 @@ $\textsf{L}_{\textsf{sideline}}$ : displacement (wrt sideline) between the cente
 
 . . .
 
-* For plays where the motion player NEVER crosses LOS, find the earlier frame of<br>{QB event, 3 seconds after snap}, and use location at that frame in place of $\textsf{L}_{\textsf{sideline}}$
+* For plays where the motion player NEVER crosses LOS, find the earlier frame of<br>{QB event, 3 seconds after snap} and use location at that frame in place of $\textsf{L}_{\textsf{sideline}}$
   
 * Why 3 seconds? For plays where motion players do cross LOS...
   
@@ -558,11 +558,7 @@ $\textsf{L}_{\textsf{sideline}}$ : displacement (wrt sideline) between the cente
 
 ## Model-based (parametric) clustering
 
-* Key idea: data are considered as coming from a mixture of underlying probability distributions
-
-. . .
-
-* Assume data are sample from a population with underlying density; estimate density, use its characteristics to determine clustering structure
+* Key idea: assume data are generated from a finite mixture of parametric distributions and define clusters through the estimated mixture components
 
 . . .
 
@@ -574,7 +570,11 @@ $\textsf{L}_{\textsf{sideline}}$ : displacement (wrt sideline) between the cente
   
 . . .  
   
-* Other variations: skewed normal, Student's-$t$, beta, etc. (as long as it can be estimated)
+* Other variations
+
+  * Different distributions: skewed normal, Student's-$t$, beta, etc. (as long as it can be estimated)
+  
+  * Noise component, group for outliers, contaminated or truncated distributions
 
 ## Mixture models in general
 
@@ -592,7 +592,7 @@ $\textsf{L}_{\textsf{sideline}}$ : displacement (wrt sideline) between the cente
   
 . . .
 
-* We need to choose the number of components (clusters) $K$ and the weights $\tau_k$, and estimate the parameters $\theta_k$ of the mixture component densities $f_k$
+* We need to choose the number of components (clusters) $K$, and estimate the weights $\tau_k$ and parameters $\theta_k$
 
 
 ## Gaussian mixture models
@@ -657,7 +657,7 @@ $\textsf{L}_{\textsf{sideline}}$ : displacement (wrt sideline) between the cente
 
 ## Model fitting and selection
 
-* Model fitting is done using an Expectation-Maximization (EM) algorithm
+* Model fitting is done using the Expectation-Maximization (EM) algorithm
 
 * Since this is a statistical model, we can choose the number of components/clusters $K$ and covariance constraint using the Bayesian Information Criterion ($\textsf{BIC}$) $$\textsf{BIC} = 2\log L(x \mid \theta) - m\log n \,,$$
 
@@ -667,7 +667,7 @@ $\textsf{L}_{\textsf{sideline}}$ : displacement (wrt sideline) between the cente
   
   * $n$: number of observations
 
-* The BICs are calculated for all candidate models (different combinations of $K$ and covariance constraints), and we select one final model that gives the optimum BIC value
+* The $\textsf{BIC}$ values are calculated for all candidate models (different combinations of $K$ and covariance constraints), and we select one final model that gives the optimum $\textsf{BIC}$ value
 
 :::aside
 <br>
@@ -675,7 +675,7 @@ The above $\textsf{BIC}$ is really the $- \textsf{BIC}$ of what you typically se
 :::
 
 
-## Expectation-Maximization (EM) algorithm
+## EM algorithm
 
 * Goal: Given a GMM, we want to maximize the likelihood function with respect to the parameters (means & covariances of the components and mixture weights)
 
@@ -968,9 +968,8 @@ motion_gmm |>
 * Can also make other pair plots (or do PCA and plot first 2 PCs)
 
 ```{r}
-# motion_gmm |>
-#   plot(what = "classification")
-
+#| echo: true
+#| code-fold: true
 motion_gmm |> 
   broom::augment(plays_clustering_features) |> 
   ggplot(aes(x = x_change_snap, y = y_change_snap, color = .class, size = .uncertainty)) +
@@ -994,12 +993,14 @@ motion_gmm |>
   * Standardize relative to line of scrimmage, middle of the field/formation, QB location
   
   * Analysis of motion player's position (WR/TE/RB) in each cluster
+  
+  * Analysis of QB throws (e.g. time to throw, whether there is a throw)
 
   * Human validation (e.g. talk to a coach, compare with a real football team's playbook)
   
 . . .
 
-* Preview of results: We can see some structural differences between the clusters and probably label some of them (1: orbit?, 2: fly/jet?, 4: glide?, 5: over?, 7: exit? etc.)
+* Preview of results: We can see some structural differences between the clusters and label some of them (1: orbit?, 2: fly/jet?, 4: glide?, 5: over?, 7: exit? etc.)
 
 ## What are the clusters?
 
