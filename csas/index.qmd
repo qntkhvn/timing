@@ -1,0 +1,1060 @@
+---
+title: "Unsupervised learning with tracking data"
+# title: "Unsupervised learning with tracking data:<br>Model-based clustering of pre-snap motion"
+subtitle: "<br>Connecticut Sports Analytics Symposium 2026"
+# author: '<br><font size="12">Quang Nguyen</font><br><br><font size="7">`qntkhvn.netlify.app`</font>'
+footer:  "[qntkhvn.github.io/timing/csas](https://qntkhvn.github.io/timing/csas)"
+format:
+  revealjs:
+    embed-resources: true
+    height: 900
+    width: 1600
+    theme: theme.scss
+    smaller: true
+    slide-number: c
+    linestretch: 1.5
+    code-line-numbers: false
+    html-math-method:
+      method: mathjax
+      url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    # title-slide-attributes:
+    #   data-background-image: cmustatds.png, cmsac.png
+    #   data-background-size: 27%, 31%
+    #   data-background-position: 22% 84%, 80% 85%  
+---
+
+```{r}
+#| label: setup
+#| include: false
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  fig.retina = 3, 
+  out.width = "100%",
+  cache = FALSE,
+  echo = FALSE,
+  message = FALSE, 
+  warning = FALSE,
+  comment = "",
+  hiline = TRUE,
+  fig.align = "center"
+)
+library(tidyverse)
+```
+
+## Plan for today
+
+* Goal: a tutorial on how tracking data can be used for unsupervised learning problems
+
+. . .
+
+* What should you takeaway?
+
+  * NOT necessarily the code (you can always go back and run the code later)
+
+  * focus on the **process** and **concepts**
+
+. . .
+
+::: {.callout-tip icon=false title="Topic"}
+
+* Focus: player tracking data in American football (NFL)
+
+* Problem: model-based clustering of pre-snap motion<br>(part of a 2025 NFL Big Data Bowl semifinalist entry)
+
+:::
+
+
+## Outline
+
+* Player tracking data and NFL Big Data Bowl overview
+
+* Working with tracking data
+
+  * Data overview
+  
+  * Data preparation
+  
+  * Data visualization
+
+* Application: model-based clustering of pre-snap motion
+
+  * More data preparation
+  
+  * Unsupervised learning
+
+# Player tracking data
+
+## {-}
+
+<center>
+![](ngs.png){width=80%}
+<center>
+
+## NFL Big Data Bowl: Background
+
+* Premier sports analytics competition, focusing on player tracking data
+
+* Data are collected at 10 Hz using RFID chips placed in player shoulder pads and ball
+
+* Every year the NFL releases a sample a tracking data with a competition theme
+
+* Multiple tracks 
+
+  * college/university/undergraduate 
+  
+  * open/metric
+  
+  * coaching, broadcast
+  
+* Prizes: $100,000 total prize since 2021 (prize distribution may be different for each year)
+
+## NFL Big Data Bowl: Themes
+
+Started in 2019, hosted on Kaggle since 2nd year
+
+* [2019](https://github.com/nfl-football-ops/Big-Data-Bowl): route combinations + rule changes + speed
+    
+* [2020](https://www.kaggle.com/competitions/nfl-big-data-bowl-2020): yards gained after receiving a handoff (prediction competition)
+    
+* [2021](https://www.kaggle.com/competitions/nfl-big-data-bowl-2021): secondary
+    
+* [2022](https://www.kaggle.com/competitions/nfl-big-data-bowl-2022): special teams
+    
+* [2023](https://www.kaggle.com/competitions/nfl-big-data-bowl-2023): linemen on pass plays
+    
+* [2024](https://www.kaggle.com/competitions/nfl-big-data-bowl-2024): tackling
+    
+* [2025](https://www.kaggle.com/competitions/nfl-big-data-bowl-2025): pre-snap
+    
+* 2026 [prediction](https://www.kaggle.com/competitions/nfl-big-data-bowl-2026-prediction) & [analytics](https://www.kaggle.com/competitions/nfl-big-data-bowl-2026-analytics): player movement while the ball is in the air
+
+# Data
+
+## Data overview
+
+* What are the provided datasets? (examples from BDB 2025)
+  
+  *   Contextual data (games, plays, players, player-play)
+  
+  *   Tracking data
+
+* Full data dictionary: <https://www.kaggle.com/competitions/nfl-big-data-bowl-2025/data>
+
+(Note: Data are very similar across the years)
+
+## Data: games
+
+`games.csv`: game info
+
+```{r}
+games <- read_csv("games.csv")
+games |> 
+  head(30) |> 
+  rmarkdown::paged_table()
+```
+
+## Data: plays
+
+`plays.csv`: play-level info
+
+```{r}
+plays <- read_csv("plays.csv")
+plays |> 
+  head(30) |> 
+  rmarkdown::paged_table()
+```
+
+## Data: players
+
+`players.csv`: player info
+
+```{r}
+players <- read_csv("players.csv")
+players |> 
+  head(30) |> 
+  rmarkdown::paged_table()
+```
+
+## Data: player-play
+
+`player_play.csv`: player stats/indicators for each play 
+
+```{r}
+player_play <- read_csv("player_play.csv")
+player_play |> 
+  head(30) |> 
+  rmarkdown::paged_table()
+```
+
+## Data: tracking data
+
+`tracking_week_[i].csv`: for week  `i` $\in [1:9]$ during 2022 NFL regular season
+
+```{r}
+tracking <- read_csv("../data/tracking_week_3.csv")
+tracking |>
+  filter(gameId == 2022092502, playId == 1180, nflId == 40011) |> 
+  rmarkdown::paged_table()
+```
+
+## From pre-snap to post-snap
+
+<br>
+
+```{r}
+library(tidyverse)
+
+fake_points <- tibble(
+  y = 0, 
+  x = c(-0.2, 0, 0.2, 0.4, 0.6, 0.9),
+  col = c("black", "black", "darkorange", "black", "black", "black"),
+  txt = c("Huddle", "Lineset", "Motion", "Snap", "Pass", "End")
+)
+
+p_base <- ggplot() +
+  theme_void() +
+  annotate("segment", x = -0.2, y = 0, xend = 1, yend = 0,
+           arrow = arrow(type = "closed", length = unit(0.03, "npc"))) +
+  annotate("segment", x = 0.4, y = 0, xend = 0.4, yend = 0.45, linetype = "dashed") +
+  annotate("text", x = c(0.1, 0.75), y = 0.5, label = c("PRE-SNAP", "POST-SNAP"), size = 10, fontface = "bold") +
+  geom_text(data = fake_points, aes(x, y, label = txt), vjust = 2.5, size = 6) +
+  expand_limits(y = -0.07)
+```
+
+```{r}
+p_base +
+  geom_point(data = fake_points, aes(x, y), size = 6)
+```
+
+
+# Working with tracking data
+
+## Data prep: Field standardization
+
+* In the raw data, there are 2 play directions (with respect to the offense): left and right
+
+* We need to standardize player tracking coordinates
+
+  * Ensure the offense is always moving in the same direction
+
+  * Helpful for feature engineering and modeling
+  
+## Data prep: Field standardization
+
+<center>
+![](field.png){width=80%}
+</center>
+
+## Data prep: Field standardization
+
+::: columns
+::: {.column width="50%"}
+
+* First, read in the data<br>(Data files are in the same directory<br>as the slides source file)
+
+```{r}
+#| echo: true
+#| eval: false
+library(tidyverse)
+theme_set(theme_light())
+games <- read_csv("games.csv")
+plays <- read_csv("plays.csv")
+players <- read_csv("players.csv")
+player_play <- read_csv("player_play.csv")
+tracking <- list.files(pattern = "tracking_week_") |> 
+  map(read_csv) |> 
+  list_rbind()
+```
+
+:::
+::: {.column width="50%"}
+
+* Make all plays go from left to right, then flip player direction and orientation 
+
+```{r}
+#| echo: true
+#| eval: false
+tracking <- tracking |>
+  mutate(
+    # make all plays go from left to right
+    x = ifelse(playDirection == "left", 120 - x, x),
+    y = ifelse(playDirection == "left", 160 / 3 - y, y),
+    # flip player direction and orientation
+    dir = ifelse(playDirection == "left", dir + 180, dir),
+    dir = ifelse(dir > 360, dir - 360, dir),
+    o = ifelse(playDirection == "left", o + 180, o),
+    o = ifelse(o > 360, o - 360, o)
+  )
+```
+
+:::
+:::
+
+
+## Visualizing tracking data
+
+Example play: Chiefs vs Colts (week 3), 9-yard pass by P. Mahomes, T. Kelce in motion
+
+<center>
+![](track.png){width=78%}
+</center>
+
+
+## Visualizing tracking data
+
+::: columns
+::: {.column width="50%"}
+
+*   First, set up the field background with `sportyR`
+
+```{r}
+#| echo: true
+library(sportyR)
+field_params <- list(
+  field_apron = "springgreen3",
+  field_border = "springgreen3",
+  offensive_endzone = "springgreen3",
+  defensive_endzone = "springgreen3",
+  offensive_half = "springgreen3",
+  defensive_half = "springgreen3"
+)
+field_background <- geom_football(
+  league = "nfl",
+  display_range = "in_bounds_only",
+  x_trans = 60,
+  y_trans = 80 / 3,
+  xlims = c(10, 55),
+  color_updates = field_params
+)
+```
+
+:::
+::: {.column width="50%"}
+
+<br>
+
+```{r}
+#| echo: false
+#| fig-height: 7
+field_background
+```
+
+:::
+:::
+
+## Visualizing tracking data
+
+* Play animation with `gganimate`
+
+* Note that new columns for team colors and sizes have been added to the data
+
+::: columns
+::: {.column width="50%"}
+
+```{r}
+#| echo: true
+example_play <- tracking |> 
+  filter(gameId == 2022092502, playId == 1180) |> 
+  mutate(
+    pt_color = case_when(
+      club == "KC" & nflId != 40011 ~ "white",
+      club == "KC" & nflId == 40011 ~ "gold",
+      club == "IND" ~ "#002C5F",
+      club == "football" ~ "#654321"
+    ),
+    pt_size = ifelse(club == "football", 3, 6)
+  )
+```
+
+```{r}
+#| echo: true
+#| eval: false
+library(gganimate)
+field_background +
+  geom_point(data = example_play,
+             aes(x, y),
+             size = example_play$pt_size,
+             color = example_play$pt_color) +
+  transition_time(example_play$frameId)
+```
+
+
+:::
+::: {.column width="50%"}
+
+```{r}
+#| eval: false
+#| fig-height: 7.5
+library(gganimate)
+field_background +
+  geom_point(data = example_play,
+             aes(x, y),
+             size = example_play$pt_size,
+             color = example_play$pt_color) +
+  transition_time(example_play$frameId)
+```
+
+<center>
+![](sportyr_play.gif)
+</center>
+
+:::
+:::
+
+# Motion type clustering
+
+## Problem formulation
+
+* Problem: provide (unsupervised) labels for the types of motion by receiver
+
+. . .
+
+* What is motion in American football?
+
+. . .
+
+> In gridiron football, motion refers to the movement of an offensive player at the time of the snap. (Source: [Wikipedia](https://en.wikipedia.org/wiki/Motion_(gridiron_football)))
+
+. . .
+
+* There are many types of motion (see [here](https://web.archive.org/web/20241224211405/https://www.viqtorysports.com/pre-snap-movement-in-the-offense/))
+
+## Motion example: jet/fly sweep
+
+<center>
+![](jet.gif){width=80%}
+</center>
+
+## Motion example: orbit
+
+<center>
+![](orbit.gif){width=80%}
+</center>
+
+## Motion example: exit
+
+<center>
+![](exit.gif){width=80%}
+</center>
+
+## Clustering strategy
+
+* Strategy: extract features from tracking data, then perform model-based clustering
+
+  * This can be applied to various unsupervised labeling problems in sports (with tracking data)
+  
+. . .
+
+* Input: features summarizing the trajectory of motion players at
+different events during a play, relative to where the center lines up before the snap
+
+. . .
+
+* Feed these features into any clustering algorithm ($k$-means, Gaussian mixture model,...)
+
+. . .
+
+* Inspect results and provide annotations for the motion types
+
+. . .
+
+* Alternative strategy: functional/curve clustering (more advanced; working with full trajectory)
+
+## Clustering features
+
+<center>
+![](features.png){width=70%}
+</center>
+
+## Clustering features
+
+$\textsf{B}_{\textsf{sideline}}$ : displacement (wrt sideline) between center and motion player at ball snap 
+
+$\textsf{B}_{\textsf{endzone}}$ : displacement (wrt endzone) between center and motion player at ball snap
+
+$\textsf{M}_{\textsf{sideline}}$ : displacement (wrt sideline) between center and motion player at the start of motion 
+
+$\textsf{L}_{\textsf{sideline}}$ : displacement (wrt sideline) between the center and motion player at the moment of<br>crossing the line of scrimmage (LOS)
+
+. . .
+
+* For plays where the motion player NEVER crosses LOS, find the earlier frame of<br>{QB event, 3 seconds after snap}, and use location at that frame in place of $\textsf{L}_{\textsf{sideline}}$
+  
+* Why 3 seconds? For plays where motion players do cross LOS...
+  
+  * Plot the distribution of time elapsed between the moments of ball snap and crossing LOS 
+    
+  * Find a threshold that capture a majority of the values of that distribution
+
+# Clustering
+
+## Clustering (cluster analysis)
+
+* Clustering is a fundamental problem in unsupervised learning
+
+* **Goal**: partition of the observations into different clusters so that observations **within** a cluster are **more similar** to each other
+
+. . .
+
+::: columns
+::: {.column width="50%" style="text-align: left;"}
+
+**Hard clustering**
+
+* Example: $k$-means, hierarchical clustering
+  
+* Output hard assignments
+  
+* Strictly assign each observation to only one cluster
+  
+:::
+
+::: {.column width="50%" style="text-align: left;"}
+
+**Soft/fuzzy clustering** 
+
+* Example: model-based clustering, mixture model
+
+* Output soft assignments
+  
+* Assign an observation a probability of belonging to each cluster
+  
+* Provide uncertainty in the clustering results
+  
+* Incorporate statistical modeling into clustering
+  
+:::
+
+:::
+
+## Classification vs clustering
+
+::: columns
+::: {.column width="50%" style="text-align: left;"}
+
+**Classification**
+
+*   Supervised learning
+
+*   We are given labeled (categorical) data
+
+*   Focus on generalizability<br>(i.e. build a classifier that performs well on predicting unseen/test data)
+
+:::
+
+::: {.column width="50%" style="text-align: left;"}
+
+**Clustering**
+
+*   Unsupervised learning (often more subjective)
+
+*   We are only given the data points (with no labels)
+
+*   Focus on finding interesting subgroups/structure in the data
+
+:::
+:::
+
+
+## Model-based (parametric) clustering
+
+* Key idea: data are considered as coming from a mixture of underlying probability distributions
+
+. . .
+
+* Assume data are sample from a population with underlying density; estimate density, use its characteristics to determine clustering structure
+
+. . .
+
+* Most popular method: Gaussian mixture model (GMM)
+
+  *   Each observation is assumed to be distributed as one of $K$ multivariate normal distributions
+
+  *   $K$ is the number of clusters/components
+  
+. . .  
+  
+* Other variations: skewed normal, Student's-$t$, beta, etc. (as long as it can be estimated)
+
+## Mixture models in general
+
+* Each population subgroup (component/cluster) is represented by some density $f_k(x; \theta_k)$
+
+. . .
+
+* The population density $f(x)$ is a weighted combination (i.e. mixture) of the subgroup densities $$\displaystyle f(x) = \sum_{k=1}^K \tau_k f_k(x; \theta_k)$$
+
+  * $\tau_k$: **mixture weights**, with $\tau_k \ge 0$ and $\sum_{k=1}^K \tau_k = 1$
+
+  * $f_k$: **mixture components**
+
+  * $K$: total number of mixture components (clusters)
+  
+. . .
+
+* We need to choose the number of components (clusters) $K$ and the weights $\tau_k$, and estimate the parameters $\theta_k$ of the mixture component densities $f_k$
+
+
+## Gaussian mixture models
+
+* Assume a **parametric mixture model** (with **parameters** $\theta_k$ for the $k$-th component) $$f(x) = \sum_{k=1}^K \tau_k f_k(x; \theta_k)$$
+
+* The mixture component densities are assumed to be Gaussian with parameters $\theta_k = \{\mu_k, \Sigma_k\}$
+
+. . .
+
+* The covariance matrices $\Sigma_k$ characterize the clusters
+
+  * **volume**: size of the clusters (number of observations)
+
+  * **shape**: direction of variance (which variables display more variance)
+
+  * **orientation**: aligned with axes (low covariance) versus tilted (relationships between variables)
+  
+. . .  
+  
+* Each of these (volume/shape/orientation) can be chosen to be the same or different among clusters  
+
+## Covariance constraints
+
+3 letters in model name denote (in order) the volume, shape, and orientation across clusters
+
+<center>
+![](covariances.png){height=620}
+</center>
+
+
+## Covariance constraints
+
+<style>
+.table-small table {
+  font-size: 0.72em;
+}
+</style>
+
+<center>
+
+::: table-small
+| Model | Distribution | Volume    | Shape    | Orientation     |
+|-------|--------------|-----------|----------|-----------------|
+| EII   | Spherical	   | Equal	   | Equal	  | --              |
+| VII   | Spherical	   | Variable  | Equal	  | --              |
+| EEI   | Diagonal	   | Equal	   | Equal	  | Coordinate axes |
+| VEI   | Diagonal	   | Variable  | Equal	  | Coordinate axes |
+| EVI   | Diagonal	   | Equal	   | Variable | Coordinate axes |
+| VVI   | Diagonal	   | Variable  | Variable | Coordinate axes |
+| EEE   | Ellipsoidal  | Equal	   | Equal	  | Equal           |
+| EVE   | Ellipsoidal  | Equal	   | Variable | Equal           |
+| VEE   | Ellipsoidal  | Variable  | Equal	  | Equal           |
+| VVE   | Ellipsoidal  | Variable  | Variable | Equal           |
+| EEV   | Ellipsoidal  | Equal	   | Equal	  | Variable        |
+| VEV   | Ellipsoidal  | Variable  | Equal	  | Variable        |
+| EVV   | Ellipsoidal  | Equal	   | Variable | Variable        |
+| VVV   | Ellipsoidal  | Variable  | Variable | Variable        |
+:::
+
+</center>
+
+## Model fitting and selection
+
+* Model fitting is done using an Expectation-Maximization (EM) algorithm
+
+* Since this is a statistical model, we can choose the number of components/clusters $K$ and covariance constraint using the Bayesian Information Criterion ($\textsf{BIC}$) $$\textsf{BIC} = 2\log L(x \mid \theta) - m\log n \,,$$
+
+  * $L(x \mid \theta)$: likelihood of the considered model
+
+  * $m$: number of parameters (e.g. VVV has the most parameters)
+  
+  * $n$: number of observations
+
+* The BICs are calculated for all candidate models (different combinations of $K$ and covariance constraints), and we select one final model that gives the optimum BIC value
+
+:::aside
+<br>
+The above $\textsf{BIC}$ is really the $- \textsf{BIC}$ of what you typically see, this sign flip is just for ease
+:::
+
+
+## Expectation-Maximization (EM) algorithm
+
+* Goal: Given a GMM, we want to maximize the likelihood function with respect to the parameters (means & covariances of the components and mixture weights)
+
+. . .
+
+* First, initialize the model parameters ($\mu_k, \Sigma_k, \tau_k$) randomly
+
+. . .
+
+* Then, alternate between the following two steps (keep repeating until convergence)
+
+    *   **E-step**: estimate $\gamma_{ik}$, the **soft assignments** of observation $i$ belonging to component/cluster $k$
+    
+    *   **M-step**: re-estimate the model parameters
+    
+. . .    
+    
+* Output: $\hat{\gamma}_{ik}$ are the final estimated soft assignments of observation $i$ belonging to cluster $k$
+
+    * We can assign observation $i$ to a cluster with the largest $\hat{\gamma}_{ik}$
+  
+    * We also get the cluster assignment **uncertainty** of $\displaystyle 1 - \max_k \hat{\gamma}_{ik}$    
+
+## Data preparation
+
+* For illustration purpose, let's only consider plays with one motion player since line set *and* a receiver running route
+
+```{r}
+#| echo: true
+#| eval: false
+player_play_motion <- player_play |> 
+  filter(motionSinceLineset == TRUE & wasRunningRoute == 1) |> 
+  add_count(gameId, playId, name = "n_motion") |> 
+  filter(n_motion == 1) |> 
+  distinct(gameId, playId, nflId)
+```
+
+* Get the tracking data for only the players in the above subset of plays
+
+```{r}
+#| echo: true
+#| eval: false
+tracking_players_motion <- tracking |> 
+  inner_join(player_play_motion)
+```
+
+## Feature engineering
+
+Coordinate system
+  
+* `x`: direction of the target endzone
+  
+* `y`: direction of the sideline
+
+. . . 
+
+Some challenges and decisions
+
+* We don't have the role indicator for who the ball snapper is in the data
+
+  * We could rely on the `position` column in the `players` data and<br>get those whose position is `C` (center)
+  
+  * This doesn't guarantee that we can identify the snapper for every play<br>(sometimes the guard, tackle, or even long snapper has to snap the ball if the center is injured)
+
+## Feature engineering
+
+* Instead, use these as reasonable proxy for `x` and `y` of the center before the snap
+
+  * Use the `x` for the line of scrimmage
+
+  * Use the `y` for the QB before the snap
+
+    * Use the location at any of `line_set`/`man_in_motion`/`ball_snap`<br>(let's go with `line_set`)
+
+  * Avoid using football location since it can be inaccurate
+
+
+## Get relevant frames for each play
+
+* Frames of `line_set`, `man_in_motion`, `ball_snap`, and<br>QB event (`pass_forward`, `qb_sack`, `qb_strip_sack`, `fumble`)
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+tracking_players_motion <- tracking_players_motion |> 
+  group_by(gameId, playId) |> 
+  mutate(frame_line_set = frameId[which(event == "line_set")][1],
+         frame_man_in_motion = frameId[which(event == "man_in_motion")][1],
+         frame_ball_snap = frameId[which(frameType == "SNAP")][1],
+         frame_qb_event = frameId[which(event %in% c("pass_forward", "qb_sack", "qb_strip_sack", "fumble"))][1]) |> 
+  ungroup() |> 
+  filter(!is.na(frame_line_set), !is.na(frame_man_in_motion), !is.na(frame_ball_snap), !is.na(frame_qb_event))
+```
+
+* Frame when the motion player crosses the line of scrimmage
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+# load nflreadr pbp to get line of scrimmage info (yardline_100) + info about the QB/passer (passer_player_id)
+play_context <- nflreadr::load_pbp(2022) |> 
+  mutate(old_game_id = as.numeric(old_game_id))
+
+plays_cross_los <- tracking_players_motion |>
+  left_join(play_context, by = join_by(gameId == old_game_id, playId == play_id)) |> 
+  mutate(x_los = 110 - yardline_100) |>
+  filter(frameId >= frame_ball_snap & frameId <= frame_qb_event) |>
+  group_by(gameId, playId, nflId) |>
+  summarize(frame_cross_los = frameId[which(x > x_los)][1]) |> 
+  ungroup()
+```
+
+* For plays where the motion player NEVER crosses the line of scrimmage,<br>find the earlier frame of {QB event, 3 seconds after snap}
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+plays_never_cross_los <- tracking_players_motion |> 
+  distinct(gameId, playId, nflId, 
+           frame_qb_event, frame_3s_after_snap = frame_ball_snap + 30) |> 
+  mutate(frame_end = pmin(frame_qb_event, frame_3s_after_snap)) |> 
+  inner_join(filter(plays_cross_los, is.na(frame_cross_los))) |> 
+  select(gameId:nflId, frame_end)
+
+plays_frame_end <- plays_cross_los |> 
+  filter(!is.na(frame_cross_los)) |> 
+  rename(frame_end = frame_cross_los) |> 
+  bind_rows(plays_never_cross_los)
+
+# Why 3 seconds after the snap?
+# Plot distribution of time elapsed between snap and crossing LOS for plays with motion players crossing LOS.
+# Find a threshold that capture a majority of the values of that distribution.
+# 3 sec i.e. 30 frames capture a high proportion of the values. (2.5, 3, 3.5, 4, etc. should all be fine, just needs to be something reasonable)
+
+# plays_cross_los |>
+#   inner_join(distinct(tracking_players_motion,
+#                       gameId, playId, nflId, frame_ball_snap)) |>
+#   mutate(frame_snap_to_cross_los = frame_cross_los - frame_ball_snap) |>
+#   ggplot(aes(frame_snap_to_cross_los)) +
+#   geom_histogram(bins = 50) +
+#   geom_vline(xintercept = 30, linetype = "dashed")
+```
+
+## Get relevant frames for each play
+
+* Create a table storing the relevant frames for each play
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+plays_frames <- tracking_players_motion |> 
+  distinct(gameId, playId, nflId,
+           frame_line_set, frame_man_in_motion, frame_ball_snap) |> 
+  left_join(plays_frame_end)
+```
+
+```{r}
+#| echo: false
+read_rds("../data/plays_frames.rds") |> 
+  head(30) |> 
+  rmarkdown::paged_table()
+```
+
+## Compute clustering features
+
+* Desiredata: a table with 
+
+  * `gameId`, `playId`, `nflId`
+  * 4 clustering features about change in `y`/`x` mentioned earlier
+
+* First, get the location of the QB (passer), in order to approximate `y` for the center before the snap
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+plays_passer <- play_context |> 
+  select(gameId = old_game_id, playId = play_id, passer_player_id) |> 
+  left_join(select(nflreadr::load_players(), passer_player_id = gsis_id, nflId = nfl_id)) |> 
+  select(-passer_player_id) |> 
+  inner_join(distinct(plays_frames, gameId, playId))
+
+tracking_passer <- tracking |> 
+  inner_join(mutate(plays_passer, nflId = as.numeric(nflId))) |> 
+  left_join(play_context, by = join_by(gameId == old_game_id, playId == play_id)) |> 
+  mutate(x_los = 110 - yardline_100) |> 
+  select(gameId, playId, frameId, x_los, y_passer = y)
+```
+
+* Now join, pivot, and calculate all features
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+plays_frames_locations <- plays_frames |> 
+  pivot_longer(starts_with("frame_"), 
+               values_to = "frameId", 
+               names_to = "frame_event",
+               names_prefix = "frame_") |> 
+  inner_join(tracking_players_motion) |> 
+  select(gameId, playId, nflId, frameId, frame_event, x, y) |> 
+  left_join(tracking_passer) |> 
+  pivot_wider(id_cols = c(gameId, playId, nflId),
+              names_from = frame_event,
+              values_from = c(frameId, x, y, x_los, y_passer),
+              values_fn = list) |> 
+  unnest(cols = contains("_")) 
+
+plays_clustering_features <- plays_frames_locations |> 
+  mutate(x_center_before_snap = x_los_line_set,
+         y_center_before_snap = y_passer_line_set, 
+         y_change_start = abs(y_man_in_motion - y_center_before_snap),
+         y_change_end = abs(y_end - y_center_before_snap),
+         x_change_snap = abs(x_ball_snap - x_center_before_snap),
+         y_change_snap = abs(y_ball_snap - y_center_before_snap))
+```
+
+## Model-based clustering with `mclust`
+
+```{r}
+#| echo: false
+plays_clustering_features <- read_rds("../data/plays_clustering_features.rds")
+tracking_players_motion <- read_rds("../data/tracking_players_motion.rds")
+```
+
+```{r}
+#| echo: true
+library(mclust)
+set.seed(1)
+motion_gmm <- plays_clustering_features |> 
+  select(contains("_change_")) |> 
+  Mclust(G = 3:15)
+```
+
+```{r}
+motion_gmm |>
+  summary()
+```
+
+
+## Model selection
+
+```{r}
+# grid search between 3 and 15 components
+# optimal number of clusters is chosen using BIC
+
+# 8 is the optimal number of clusters
+# motion_gmm |>
+#   summary()
+
+# pairs plot 
+# view clustering assignments
+# motion_gmm |> 
+#   plot(what = "classification")
+
+# view BIC for optimal model selection
+# motion_gmm |>
+#   plot(what = "BIC")
+
+# view other summary stats with {broom}
+# motion_gmm |> broom::tidy()
+# motion_gmm |> broom::glance()
+
+# motion_gmm |> broom::augment(plays_clustering_features)
+# .class
+# .uncertainty
+# make an example plot
+
+# kmeans++
+# library(flexclust)
+# motion_kmeanspp <- plays_clustering_features |>
+#   select(contains("_change_")) |>
+#   mutate(across(everything(), ~ .x |> scale() |> as.numeric())) |>
+#   kcca(k = 8, control = list(initcent = "kmeanspp"))
+```
+
+```{r}
+#| echo: true
+motion_gmm |>
+  plot(what = "BIC", legendArgs = list(ncol = 4))
+```
+
+## View clustering assignments with uncertainty
+
+* Can also make other pair plots (or do PCA and plot first 2 PCs)
+
+```{r}
+# motion_gmm |>
+#   plot(what = "classification")
+
+motion_gmm |> 
+  broom::augment(plays_clustering_features) |> 
+  ggplot(aes(x = x_change_snap, y = y_change_snap, color = .class, size = .uncertainty)) +
+  geom_point(alpha = 0.4) +
+  ggthemes::scale_color_colorblind() +
+  theme_light()
+```
+
+## What are the clusters?
+
+* We have these clustering results. Can we label them?
+
+. . .
+
+* Idea: plot the trajectory between `man_in_motion` (red) and `ball_snap` (blue) of motion players in each cluster
+
+. . .
+
+* This is just a starting point and can certainly be improved
+
+  * Standardize relative to line of scrimmage, middle of the field/formation, QB location
+  
+  * Analysis of motion player's position (WR/TE/RB) in each cluster
+
+  * Human validation (e.g. talk to a coach, compare with a real football team's playbook)
+  
+. . .
+
+* Preview of results: We can see some structural differences between the clusters and probably label some of them (1: orbit?, 2: fly/jet?, 4: glide?, 5: over?, 7: exit? etc.)
+
+## What are the clusters?
+
+```{r}
+#| echo: true
+#| code-fold: true
+motion_clusters <- motion_gmm |>
+  broom::augment(plays_clustering_features) |>
+  mutate(curve_id = row_number()) |>
+  select(gameId:frameId_end, cluster = .class, curve_id) |>
+  left_join(tracking_players_motion) |>
+  filter(frameId >= frameId_man_in_motion & frameId <= frame_ball_snap) |>
+  mutate(frame_color = ifelse(frameId == frameId_man_in_motion, "red", NA),
+         frame_color = ifelse(frameId == frame_ball_snap, "blue", frame_color))
+
+motion_clusters |> 
+  ggplot(aes(y, x, group = curve_id)) +
+  geom_point(aes(color = I(frame_color)), size = 0.8, alpha = 0.5) +
+  geom_path(alpha = 0.3) +
+  facet_wrap(~ cluster, nrow = 2) +
+  labs(x = "Along the sideline", y = "Toward the endzone") +
+  theme_light()
+```
+
+
+## Trajectory clustering in team sports
+
+* [Miller and Bornn (2017)](https://www.sloansportsconference.com/research-papers/possession-sketches-mapping-nba-strategies), Sloan: possession actions 🏀
+
+* [Gregory (2019)](https://static.capabiliaserver.com/frontend/clients/barca/wp_prod/wp-content/uploads/2020/01/40ba07f4-ready-player-run-barcelona.pdf), Barça: off-ball runs ⚽
+
+* [Chu et al. (2020)](https://arxiv.org/abs/1908.02423), JQAS: route types 🏈
+
+* [Dutta et al. (2020)](https://arxiv.org/abs/1906.11373), JQAS: pass coverage types (man/zone) 🏈
+
+* [Eager et al. (2024)](https://www.sloansportsconference.com/research-papers/using-tracking-data-to-build-offensive-line-development-tools), Sloan: pass blocking paths 🏈
+
+* [Nguyen and Yurko (2025+)](https://doi.org/10.1093/jrsssa/qnaf185), JRSSA: pre-snap motion types 🏈
+
+## Related links
+
+* [Previous tracking data workshops](https://qntkhvn.netlify.app/teaching#workshops)
+
+* Model-based clustering [review paper](https://www.annualreviews.org/content/journals/10.1146/annurev-statistics-033121-115326), book ([here](https://math.univ-cotedazur.fr/~cbouveyr/MBCbook/) and [here](https://mclust-org.github.io/mclust-book/)), [website](https://sites.stat.washington.edu/raftery/Research/mbc.html)
+
+* Contact me: [qntkhvn.netlify.app](https://qntkhvn.netlify.app)
+
+* Hire me: I will be on the 2026--27 job market
+
+. . .
+
+<br>
+
+<center>
+<b>
+<h3> Cheers. </h3>
+</b>
+</center>
