@@ -1,2 +1,0 @@
-index.html filter=lfs diff=lfs merge=lfs -text
-csas/index.html filter=lfs diff=lfs merge=lfs -text
